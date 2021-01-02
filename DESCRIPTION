@@ -1,0 +1,23 @@
+Package: DukeProteomicsSuite
+Title: Runs TPP, Expression Level, LiP, and SPROX methods from Proteome Discover Data
+Version: 0.0.1
+Date: 2020-12-29
+Authors@R: c(person("Aaron", "Keeler", role = c("aut", "cre"),
+                    email = "aaron.keeler@duke.edu"),
+              person("Morgan", "Bailey", role = c("aut", "cre"),
+                    email = "morgan.a.bailey@duke.edu"))
+Author: Aaron Keeler [aut, cre],
+  Morgan Bailey [aut, cre]
+Maintainer: Aaron Keeler <aaron.keeler@duke.edu>
+Description: This package consists of 4 functions that generate hit lists and volcano plots for
+  Expression level, TPP, SPROX, and LiP directly from ProteomeDiscover readout
+License: Unlimited
+Imports:
+	dplyr,
+	tidyr,
+	ggplot2,
+	magrittr
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1.9000

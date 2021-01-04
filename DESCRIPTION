@@ -1,6 +1,6 @@
 Package: DukeProteomicsSuite
-Title: Runs TPP, Expression Level, LiP, and SPROX methods from Proteome Discover Data
-Version: 0.0.1
+Title: Pipeline for Proteome Energetic Methods
+Version: 1.0.0
 Date: 2020-12-29
 Authors@R: c(person("Aaron", "Keeler", role = c("aut", "cre"),
                     email = "aaron.keeler@duke.edu"),
@@ -9,14 +9,16 @@ Authors@R: c(person("Aaron", "Keeler", role = c("aut", "cre"),
 Author: Aaron Keeler [aut, cre],
   Morgan Bailey [aut, cre]
 Maintainer: Aaron Keeler <aaron.keeler@duke.edu>
-Description: This package consists of 4 functions that generate hit lists and volcano plots for
-  Expression level, TPP, SPROX, and LiP directly from ProteomeDiscover readout
+Description: This package consists of 4 functions that generate hit lists and volcano plots for Expression level, OnePotTPP, OnePotSPROX, and STEPP directly from ProteomeDiscoverer (v. 2.3) readout. This package also includes functions to create venn diagrams comparing various methods
 License: Unlimited
+Depends: R (>= 3.2.0)
 Imports:
 	dplyr,
 	tidyr,
 	ggplot2,
-	magrittr
+	magrittr,
+	utils,
+	VennDiagram
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

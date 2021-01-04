@@ -1,12 +1,12 @@
-#' Load Expression data
+#' Expression Level Analysis
 #'
-#' This function will take expression data directly from Proteome Discoverer and generate a hit list
-#' and Volcano Plot
+#' This function will take expression data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list
+#' based on user-defined SD and p-values
 #'
-#' @param Expression_data A data file
+#' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
 #' @param SD_cutoff A number
 #' @param p_cutoff A number
-#' @return Hit list and volcano plot
+#' @return Volcano plot, Hit list, Total proteins assayed and unique protein hits
 #' @export
 
 ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
@@ -148,12 +148,16 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
 
 }
 
-#' Load Expression data and TPP data
+#' OnePotTPP Analysis
 #'
-#' This function will take expression data and TPP data directly from Proteome Discoverer and generate a hit list
-#' and Volcano Plot
+#' This function will take expression data and OnePotTPP (TMT10plex) data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list
+#' based on user-defined SD and p-values
 #'
-#' @param infile Path to the expression input file, TPP data, SD_cutoff, and p_cutoff
+#' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
+#' @param TPP_data Raw OnePotTPP (TMT10plex) ProteomeDiscoverer (v. 2.3) data
+#' @param SD_cutoff A number
+#' @param p_cutoff A number
+#' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @return Hit list, volcano plot
 #' @export
 
@@ -438,12 +442,16 @@ print(Volcano_Plot)
 
 }
 
-#' Load Expression data and SPROX data
+#' OnePotSPROX Analysis
 #'
-#' This function will take expression data and SPROX data directly from Proteome Discoverer and generate a hit list
-#' and Volcano Plot
+#' This function will take expression data and OnePotSPROX (TMT10plex) data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list
+#' based on user-defined SD and p-values
 #'
-#' @param infile Path to the expression input file, SPROX data, SD_cutoff, and p_cutoff
+#' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
+#' @param TPP_data Raw OnePotSPROX (TMT10plex) ProteomeDiscoverer (v. 2.3) data
+#' @param SD_cutoff A number
+#' @param p_cutoff A number
+#' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @return Hit list, volcano plot
 #' @export
 
@@ -741,12 +749,16 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff){
 
 }
 
-#' Load Expression data and STEPP data
+#' STEPP Analysis
 #'
-#' This function will take expression data and STEPP data directly from Proteome Discoverer and generate a hit list
-#' and Volcano Plot
+#' This function will take expression data and STEPP (TMT10plex) data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list
+#' based on user-defined SD and p-values
 #'
-#' @param infile Path to the expression input file, STEPP data, SD_cutoff, and p_cutoff
+#' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
+#' @param TPP_data Raw STEPP (TMT10plex) ProteomeDiscoverer (v. 2.3) data
+#' @param SD_cutoff A number
+#' @param p_cutoff A number
+#' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @return Hit list, volcano plot
 #' @export
 
@@ -1046,7 +1058,10 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff){
 #' This function will make a Venn Diagram showing unique hits for two different proteomics methods
 #'
 #'
-#' @param infile Path to the data1, data2, name1, and name2
+#' @param data1 unqiue hit csv output method 1
+#' @param data2 unique hit csv output method 2
+#' @param name1 method 1 name
+#' @param name2 method 2 name
 #' @return Venn Diagram
 #' @export
 
@@ -1057,7 +1072,7 @@ Two_Comparison_Venn_Diagram.Fun <- function(data1, data2, name1, name2){
   z1 <- utils::read.csv2(file = data2, header = FALSE)
 
 
-  VennDiagram::venn.diagram(x = c(z, z1) ,
+  VennDiagram::venn.diagram(x = c(z, z1),
                category.names = c(name1, name2),
                filename = 'Two_Comparison_Venn_Diagram.PNG',
                output = TRUE ,
@@ -1066,20 +1081,25 @@ Two_Comparison_Venn_Diagram.Fun <- function(data1, data2, name1, name2){
                width = 480 ,
                resolution = 300,
                compression = "lzw",
-               lwd = 1,
-               col=c("#440154ff", '#21908dff'),
-               fill = c(alpha("#440154ff",0.3), alpha('#21908dff',0.3)),
-               cex = 0.5,
-               fontfamily = "sans",
-               cat.cex = 0.3,
+               lwd = 2,
+               col= "black",
+               lty = "dotted",
+               fill = c("cornflowerblue", "darkorchid1"),
+               alpha = c(0.3, 0.3),
+               cex = 0.65,
+               fontfamily = "serif",
+               cat.cex = 0.5,
                cat.default.pos = "outer",
-               cat.pos = c(-0, 0),
+               fontface = "bold",
+               cat.pos = c(-1, 1),
                cat.dist = c(0.055, 0.055),
-               cat.fontfamily = "sans",
-               cat.col = c("#440154ff", '#21908dff'),
+               cat.fontfamily = "serif",
+               cat.col = c("darkblue", "darkorchid4"),
                scaled = FALSE
 
   )
+
+
 
 
 }

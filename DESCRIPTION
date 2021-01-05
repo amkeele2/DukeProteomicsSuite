@@ -1,5 +1,5 @@
 Package: DukeProteomicsSuite
-Title: Pipeline for Proteome Energetic Methods
+Title: Pipeline for Proteomic Energetic Methods
 Version: 1.0.0
 Date: 2020-12-29
 Authors@R: c(person("Aaron", "Keeler", role = c("aut", "cre"),

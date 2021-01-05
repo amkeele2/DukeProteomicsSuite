@@ -2,17 +2,25 @@
 % Please edit documentation in R/All_Proteomics_Functions.R
 \name{OnePotSPROX.Fun}
 \alias{OnePotSPROX.Fun}
-\title{Load Expression data and SPROX data}
+\title{OnePotSPROX Analysis}
 \usage{
 OnePotSPROX.Fun(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff)
 }
 \arguments{
-\item{infile}{Path to the expression input file, SPROX data, SD_cutoff, and p_cutoff}
+\item{Expression_data}{Raw ProteomeDiscoverer (v. 2.3) data}
+
+\item{SD_cutoff}{A number}
+
+\item{p_cutoff}{A number}
+
+\item{TPP_data}{Raw OnePotSPROX (TMT10plex) ProteomeDiscoverer (v. 2.3) data}
 }
 \value{
+Volcano plot, Hit list, Total proteins assayed and Unique protein hits
+
 Hit list, volcano plot
 }
 \description{
-This function will take expression data and SPROX data directly from Proteome Discoverer and generate a hit list
-and Volcano Plot
+This function will take expression data and OnePotSPROX (TMT10plex) data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list
+based on user-defined SD and p-values
 }

@@ -7,7 +7,13 @@
 Two_Comparison_Venn_Diagram.Fun(data1, data2, name1, name2)
 }
 \arguments{
-\item{infile}{Path to the data1, data2, name1, and name2}
+\item{data1}{unqiue hit csv output method 1}
+
+\item{data2}{unique hit csv output method 2}
+
+\item{name1}{method 1 name}
+
+\item{name2}{method 2 name}
 }
 \value{
 Venn Diagram

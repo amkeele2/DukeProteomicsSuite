@@ -2,21 +2,21 @@
 % Please edit documentation in R/All_Proteomics_Functions.R
 \name{ExpressionLevel.Fun}
 \alias{ExpressionLevel.Fun}
-\title{Load Expression data}
+\title{Expression Level Analysis}
 \usage{
 ExpressionLevel.Fun(Expression_data, SD_cutoff, p_cutoff)
 }
 \arguments{
-\item{Expression_data}{A data file}
+\item{Expression_data}{Raw ProteomeDiscoverer (v. 2.3) data}
 
 \item{SD_cutoff}{A number}
 
 \item{p_cutoff}{A number}
 }
 \value{
-Hit list and volcano plot
+Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 }
 \description{
-This function will take expression data directly from Proteome Discoverer and generate a hit list
-and Volcano Plot
+This function will take expression data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list
+based on user-defined SD and p-values
 }

@@ -6,7 +6,7 @@
 #' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
 #' @param SD_cutoff A number
 #' @param p_cutoff A number
-#' @return Volcano plot, Hit list, Total proteins assayed and unique protein hits
+#' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
 ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
@@ -106,7 +106,7 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
   n1 <-
     (Hit_ident_Exp$z_score_Exp > SD_cutoff &
        Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff)) |
-    (Hit_ident_Exp$Log_Avg < -z_score_Exp & Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff))
+    (Hit_ident_Exp$Log_Avg < -SD_cutoff & Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff))
   n2 <- as.data.frame(n1)
 
   Sig_Check_Exp <-
@@ -157,7 +157,7 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
 #' @param TPP_data Raw OnePotTPP (TMT10plex) ProteomeDiscoverer (v. 2.3) data
 #' @param SD_cutoff A number
 #' @param p_cutoff A number
-#' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
+#' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @return Hit list, volcano plot
 #' @export
 
@@ -265,7 +265,7 @@ Hit_ident_Exp <- cbind(Hit_ident1_Exp, Log_Avg_Exp, Log_10_Exp, Log_2_Exp_1, Log
 n1 <-
   (Hit_ident_Exp$z_score_Exp > SD_cutoff &
      Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff)) |
-  (Hit_ident_Exp$Log_Avg < -z_score_Exp & Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff))
+  (Hit_ident_Exp$Log_Avg < -SD_cutoff & Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff))
 n2 <- as.data.frame(n1)
 
 Sig_Check_Exp <-

@@ -4,12 +4,27 @@
 #' based on user-defined SD and p-values
 #'
 #' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
-#' @param SD_cutoff A number
-#' @param p_cutoff A number
+#' @param SD_cutoff A positive integer (default = 2)
+#' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
+#' @param TMTplex 8, 10, 16 TMTplex (default = 10)
+#' @param plot Display volcano plot (default = TRUE)
+#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
+#' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
+ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+
+  if (TMTplex !=10)
+    stop("This TMTplex is not yet supported in this version.\n")
+
+  if (SD_cutoff < 0)
+    stop("SD_cutoff must be non-negative.\n")
+
+  if (p_cutoff < 0)
+    stop("p_value cutoff must be non-negative.\n")
+
 
   High_Confidence_Exp_Level <-
     Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
@@ -135,19 +150,23 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
   utils::write.table(ExpSigExport, file = "ExpressionLevelOut.csv", row.names = FALSE)
   utils::write.table(Hit_ListExport, file = "ExpressionLevelHitsOut.csv", row.names = FALSE)
 
+
+  if (plot == TRUE){
+
   Volcano_Plot <- ggplot2::ggplot(step10,
                                   ggplot2::aes (
                                     x = z_score_Exp ,
                                     y = Log_10_Exp ,
                                     label = Accession,
                                     colour = Sig_Check_Exp
-                                  )) + ggplot2::geom_point(size = 1.5, alpha = 0.5) +
-    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = c("Not Significant","Significant"),values = c("grey","red")) +
+                                  )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
+    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels , values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 
   print(Volcano_Plot)
+  }
 
 }
 
@@ -158,13 +177,26 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff){
 #'
 #' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
 #' @param TPP_data Raw OnePotTPP (TMT10plex) ProteomeDiscoverer (v. 2.3) data
-#' @param SD_cutoff A number
-#' @param p_cutoff A number
+#' @param SD_cutoff A positive integer (default = 2)
+#' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
+#' @param TMTplex 8, 10, 16 TMTplex (default = 10)
+#' @param plot Display volcano plot (default = TRUE)
+#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
+#' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
-#' @return Hit list, volcano plot
 #' @export
 
-OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff, p_cutoff){
+OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+
+  if (TMTplex !=10)
+    stop("This TMTplex is not yet supported in this version.\n")
+
+  if (SD_cutoff < 0)
+    stop("SD_cutoff must be non-negative.\n")
+
+  if (p_cutoff < 0)
+    stop("p_value cutoff must be non-negative.\n")
 
 # Define SD and p-value cutoffs
 # Load "Expression_data" and "TPP_Raw"
@@ -434,19 +466,22 @@ utils::write.table(Hit_ListExportTPP, file = "OnePotTPPHitsOut.csv", row.names =
 
 # Visualizing Data
 
+if (plot == TRUE){
+
 Volcano_Plot <- ggplot2::ggplot(step22,
          ggplot2::aes (
            x = z_score_TPP ,
            y = TPP_log_10 ,
            label = Accession,
            colour = Sig_Check_TPP
-         )) + ggplot2::geom_point(size = 1.5, alpha = 0.5) +
-  ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = c("Not Significant","Significant"),values = c("grey","red")) +
+         )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
+  ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels ,values = labelcolor) +
   ggplot2::expand_limits(x=0, y=0) +
   ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
   ggplot2::theme(legend.title = ggplot2::element_blank())
 
 print(Volcano_Plot)
+}
 
 }
 
@@ -457,13 +492,26 @@ print(Volcano_Plot)
 #'
 #' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
 #' @param TPP_data Raw OnePotSPROX (TMT10plex) ProteomeDiscoverer (v. 2.3) data
-#' @param SD_cutoff A number
-#' @param p_cutoff A number
+#' @param SD_cutoff A positive integer (default = 2)
+#' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
+#' @param TMTplex 8, 10, 16 TMTplex (default = 10)
+#' @param plot Display volcano plot (default = TRUE)
+#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
+#' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
-#' @return Hit list, volcano plot
 #' @export
 
-OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff){
+OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+
+  if (TMTplex !=10)
+    stop("This TMTplex is not yet supported in this version.\n")
+
+  if (SD_cutoff < 0)
+    stop("SD_cutoff must be non-negative.\n")
+
+  if (p_cutoff < 0)
+    stop("p_value cutoff must be non-negative.\n")
 
   High_Confidence_Exp_Level <-
     Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
@@ -745,19 +793,22 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff){
 
   # Visualizing Data
 
+  if (plot == TRUE){
+
   Volcano_Plot <- ggplot2::ggplot(step22,
                          ggplot2::aes (
                            x = z_score_SPROX ,
                            y = SPROX_log_10 ,
                            label = Accession,
                            colour = Sig_Check_SPROX
-                         )) + ggplot2::geom_point(size = 1.5, alpha = 0.5) +
-    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = c("Not Significant","Significant"),values = c("grey","red")) +
+                         )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
+    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels, values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 
   print(Volcano_Plot)
+  }
 
 }
 
@@ -768,13 +819,26 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff){
 #'
 #' @param Expression_data Raw ProteomeDiscoverer (v. 2.3) data
 #' @param TPP_data Raw STEPP (TMT10plex) ProteomeDiscoverer (v. 2.3) data
-#' @param SD_cutoff A number
-#' @param p_cutoff A number
+#' @param SD_cutoff A positive integer (default = 2)
+#' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
+#' @param TMTplex 8, 10, 16 TMTplex (default = 10)
+#' @param plot Display volcano plot (default = TRUE)
+#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
+#' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
-#' @return Hit list, volcano plot
 #' @export
 
-STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff){
+STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+
+  if (TMTplex !=10)
+    stop("This TMTplex is not yet supported in this version.\n")
+
+  if (SD_cutoff < 0)
+    stop("SD_cutoff must be non-negative.\n")
+
+  if (p_cutoff < 0)
+    stop("p_value cutoff must be non-negative.\n")
 
   High_Confidence_Exp_Level <-
     Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
@@ -1047,10 +1111,12 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff){
   print(Hit_ListExportSTEPP)
 
   utils::write.table(STEPPExport, file = "STEPPUniqueHits.csv", row.names = FALSE, col.names = FALSE)
-  utils::write.table(STEPPSigExport, file = "OnePotSTEPPOut.csv", row.names = FALSE)
-  utils::write.table(Hit_ListExportSTEPP, file = "OnePotSTEPPHitsOut.csv", row.names = FALSE)
+  utils::write.table(STEPPSigExport, file = "STEPPOut.csv", row.names = FALSE)
+  utils::write.table(Hit_ListExportSTEPP, file = "STEPPHitsOut.csv", row.names = FALSE)
 
   # Visualizing Data
+
+  if (plot == TRUE){
 
   Volcano_Plot <- ggplot2::ggplot(step22,
                          ggplot2::aes (
@@ -1058,13 +1124,14 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff){
                            y = STEPP_log_10 ,
                            label = Accession,
                            colour = Sig_Check_STEPP
-                         )) + ggplot2::geom_point(size = 1.5, alpha = 0.5) +
-    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = c("Not Significant","Significant"),values = c("grey","red")) +
+                         )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
+    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels, values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 
   print(Volcano_Plot)
+  }
 
 }
 
@@ -1082,11 +1149,12 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff){
 #' @export
 
 
-Two_Comparison_Venn_Diagram.Fun <- function(data1, data2, name1, name2){
+Venn2.Fun <- function(data1, data2, name1, name2){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
 
+  futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
 
   VennDiagram::venn.diagram(x = c(z, z1),
                category.names = c(name1, name2),
@@ -1120,6 +1188,58 @@ Two_Comparison_Venn_Diagram.Fun <- function(data1, data2, name1, name2){
 
 }
 
+#' Three Method Comparison Venn Diagram
+#'
+#' This function will make a Venn Diagram showing unique hits for three different proteomics methods
+#'
+#'
+#' @param data1 unqiue hit csv output method 1
+#' @param data2 unique hit csv output method 2
+#' @param name1 method 1 name
+#' @param name2 method 2 name
+#' @return Venn Diagram
+#' @export
+
+
+Venn3.Fun <- function(data1, data2, data3, name1, name2, name3){
+
+  z <- utils::read.csv2(file = data1, header = FALSE)
+  z1 <- utils::read.csv2(file = data2, header = FALSE)
+  z2 <- utils::read.csv2(file = data2, header = FALSE)
+
+  futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+
+  VennDiagram::venn.diagram(x = c(z, z1, z2),
+                            category.names = c(name1, name2, name3),
+                            filename = 'Three_Comparison_Venn_Diagram.PNG',
+                            output = TRUE ,
+                            imagetype="png" ,
+                            height = 480 ,
+                            width = 480 ,
+                            resolution = 300,
+                            compression = "lzw",
+                            lwd = 2,
+                            col= "black",
+                            lty = "dotted",
+                            fill = c("cornflowerblue", "darkorchid1", "lightyellow"),
+                            alpha = c(0.3, 0.3, 0.3),
+                            cex = 0.65,
+                            fontfamily = "serif",
+                            cat.cex = 0.5,
+                            cat.default.pos = "outer",
+                            fontface = "bold",
+                            cat.pos = c(-1, 1),
+                            cat.dist = c(0.055, 0.055, 0.055),
+                            cat.fontfamily = "serif",
+                            cat.col = c("darkblue", "darkorchid4", "lightyellow"),
+                            scaled = FALSE
+
+  )
+
+
+
+
+}
 
 
 

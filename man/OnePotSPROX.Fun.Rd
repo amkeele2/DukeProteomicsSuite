@@ -4,21 +4,39 @@
 \alias{OnePotSPROX.Fun}
 \title{OnePotSPROX Analysis}
 \usage{
-OnePotSPROX.Fun(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff)
+OnePotSPROX.Fun(
+  Expression_data,
+  SPROX_Raw,
+  SD_cutoff,
+  p_cutoff,
+  TMTplex = 10,
+  plot = TRUE,
+  labels = c("Not Significant", "Significant"),
+  labelcolor = c("grey", "red"),
+  alpha = 0.5
+)
 }
 \arguments{
 \item{Expression_data}{Raw ProteomeDiscoverer (v. 2.3) data}
 
-\item{SD_cutoff}{A number}
+\item{SD_cutoff}{A positive integer (default = 2)}
 
-\item{p_cutoff}{A number}
+\item{p_cutoff}{A positive integer between 0 and 1 (default = 0.05)}
+
+\item{TMTplex}{8, 10, 16 TMTplex (default = 10)}
+
+\item{plot}{Display volcano plot (default = TRUE)}
+
+\item{labels}{Name of groups in figure legend (default = c("Not Significant", "Significant))}
+
+\item{labelcolor}{Color of Not significant and Significant data points (default = c("grey", "red"))}
+
+\item{alpha}{Transparency of plot (default = 0.5)}
 
 \item{TPP_data}{Raw OnePotSPROX (TMT10plex) ProteomeDiscoverer (v. 2.3) data}
 }
 \value{
 Volcano plot, Hit list, Total proteins assayed and Unique protein hits
-
-Hit list, volcano plot
 }
 \description{
 This function will take expression data and OnePotSPROX (TMT10plex) data directly from ProteomeDiscoverer (v. 2.3) and generate a volcano plot and hit list

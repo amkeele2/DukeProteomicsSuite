@@ -1049,7 +1049,8 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
 
   step17 <- tidyr::drop_na(step16)
   STEPPunique <- dplyr::n_distinct(step17$Accession)
-  STEPPuniquePeptide <- dplyr::n_distinct(step17$'Annotated Sequence')
+  STEPPuniquePeptide <- nrow(step17[, c("Annotated Sequence", "Accession")])
+
   # Step 18
 
   y1 <- step17$STEPP_Avg
@@ -1282,7 +1283,7 @@ Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4){
                             compression = "lzw",
                             lwd = 2,
                             col= "black",
-                            fill = c("cornflowerblue", "darkorchid1", "#ffffba", "#90ee90"),
+                            fill = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"),
                             alpha = c(0.3, 0.3, 0.3, 0.3),
                             cex = 0.5,
                             fontfamily = "serif",

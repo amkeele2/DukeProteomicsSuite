@@ -615,7 +615,6 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
     dplyr::if_else(n2$n1 == "TRUE", "Significant", "Not Significant")
   step10 <- cbind(Hit_ident_Exp, p_value_Exp, Sig_Check_Exp)
 
-
   # Remove [K] and [R] [+], [-], All bracketed Amino Acids
   # If contains oxidation modification remove it
 
@@ -623,16 +622,14 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
 
   SPROX_No_Oxid <- dplyr::filter(SPROX_Confidence, !grepl('Oxidation', Modifications))
 
-  SPROX_removed_AA1 <- dplyr::mutate_all(SPROX_No_Oxid, ~gsub("\\[[A-Z]].", "", .))
-  SPROX_removed_AA2 <- dplyr::mutate_all(SPROX_removed_AA1, ~gsub("\\.\\[[A-Z]]", "", .))
-  SPROX_removed_AA3 <- dplyr::mutate_all(SPROX_removed_AA2, ~gsub("\\[[+]].", "", .))
-  SPROX_removed_AA4 <- dplyr::mutate_all(SPROX_removed_AA3, ~gsub("\\[[-]].", "", .))
-  SPROX_removed_AA5 <- dplyr::mutate_all(SPROX_removed_AA4, ~gsub("\\.\\[[+]]", "", .))
-  SPROX_removed_AA6 <- dplyr::mutate_all(SPROX_removed_AA5, ~gsub("\\.\\[[-]]", "", .))
+  SPROX_removed_AA1 <- dplyr::mutate_all(SPROX_No_Oxid, ~gsub("\\[.*?].", "", .))
+  SPROX_removed_AA2 <- dplyr::mutate_all(SPROX_removed_AA1, ~gsub("\\.\\[.*?]", "", .))
+
 
   # If contains M filter into new column
 
-  SPROX_Just_M <- SPROX_removed_AA6[grep("M", SPROX_removed_AA6$`Annotated Sequence`), ]
+  SPROX_Just_M <- SPROX_removed_AA2[grep("M", SPROX_removed_AA2$`Annotated Sequence`), ]
+
 
   # Go through TPP analysis
 
@@ -641,13 +638,14 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
   SPROX_3 <- SPROX_Just_M[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
   step1_SPROX <- cbind(SPROX_1, SPROX_2, SPROX_3)
 
+
   # Filter blanks
 
   NA_Removed_SPROX <- tidyr::drop_na(step1_SPROX)
   NA_Removed_SPROX_Renamed <- magrittr::"%>%" (NA_Removed_SPROX,
     dplyr::rename("Accession" = "Master Protein Accessions"))
 
-  SPROX_merger <- merge(Hit_ident_Exp, NA_Removed_SPROX_Renamed)
+  SPROX_merger <- merge(Hit_ident_Exp, NA_Removed_SPROX_Renamed, by = "Accession")
   SPROX_merge <-
     dplyr::filter(
       SPROX_merger,
@@ -664,6 +662,7 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
     )
 
   # Step 11
+
 
   Normalized_SPROX_T1 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 126`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 129N`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 129N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 126`)))
   Normalized_SPROX_T2 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 127N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 129C`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 129C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 127N`)))
@@ -720,7 +719,7 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
 
   step17 <- tidyr::drop_na(step16)
   SPROXunique <- dplyr::n_distinct(step17$Accession)
-
+  SPROXuniquePep <- nrow(step17)
   # Step 18
 
   y1 <- step17$SPROX_Avg
@@ -777,13 +776,14 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
   Hit_List <- step22[ step22$Sig_Check_SPROX == "Significant", ]
   SPROXuniqueHits <- dplyr::n_distinct(Hit_List$Accession)
   SPROXExport <- unique(Hit_List$Accession)
-  SPROXSigExport <- step22[, c("Accession", "Description", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
-  Hit_ListExportSPROX <- Hit_List[, c("Accession", "Description", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
+  SPROXSigExport <- step22[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
+  Hit_ListExportSPROX <- Hit_List[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
 
 
   print(SPROXSigExport)
   print(paste("There are", SPROX_Number_Of_Hits, "Hits"))
   print(paste("There are", SPROXuniqueHits, "Unique Hits"))
+  print(paste(SPROXuniquePep, "Unique Peptides were assayed"))
   print(paste(SPROXunique, "Unique Proteins were assayed"))
   print(Hit_ListExportSPROX)
 
@@ -947,21 +947,19 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
 
 
   STEPP_Confidence <- STEPP_Raw[STEPP_Raw$Confidence == "High",]
+  print(STEPP_Confidence)
 
-  STEPP_Semi_Tryp <- dplyr::filter(STEPP_Confidence, Modifications == "1xTMT6plex [N-Term]")
+  STEPP_Semi_Tryp <- dplyr::filter(STEPP_Confidence, grepl("1xTMT6plex [N-Term]", Modifications, fixed = TRUE))
 
-  STEPP_removed_AA1 <- dplyr::mutate_all(STEPP_Semi_Tryp, ~gsub("\\[[A-Z]].", "", .))
-  STEPP_removed_AA2 <- dplyr::mutate_all(STEPP_removed_AA1, ~gsub("\\.\\[[A-Z]]", "", .))
-  STEPP_removed_AA3 <- dplyr::mutate_all(STEPP_removed_AA2, ~gsub("\\[[+]].", "", .))
-  STEPP_removed_AA4 <- dplyr::mutate_all(STEPP_removed_AA3, ~gsub("\\[[-]].", "", .))
-  STEPP_removed_AA5 <- dplyr::mutate_all(STEPP_removed_AA4, ~gsub("\\.\\[[+]]", "", .))
-  STEPP_removed_AA6 <- dplyr::mutate_all(STEPP_removed_AA5, ~gsub("\\.\\[[-]]", "", .))
+  STEPP_removed_AA1 <- dplyr::mutate_all(STEPP_Semi_Tryp, ~gsub("\\[.*?].", "", .))
+  STEPP_removed_AA2 <- dplyr::mutate_all(STEPP_removed_AA1, ~gsub("\\.\\[.*?]", "", .))
+
 
   # Go through TPP analysis
 
-  STEPP_1 <- STEPP_removed_AA6[, "Master Protein Accessions"]
-  STEPP_2 <- STEPP_removed_AA6[, c("Annotated Sequence", "Modifications")]
-  STEPP_3 <- STEPP_removed_AA6[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  STEPP_1 <- STEPP_removed_AA2[, "Master Protein Accessions"]
+  STEPP_2 <- STEPP_removed_AA2[, c("Annotated Sequence", "Modifications")]
+  STEPP_3 <- STEPP_removed_AA2[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
   step1_STEPP <- cbind(STEPP_1, STEPP_2, STEPP_3)
 
   # Filter blanks
@@ -1100,14 +1098,14 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
   Hit_List <- step22[ step22$Sig_Check_STEPP == "Significant", ]
   STEPPuniquehits <- dplyr::n_distinct(Hit_List$Accession)
   STEPPExport <- unique(Hit_List$Accession)
-  STEPPSigExport <- step22[, c("Accession", "Description", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
-  Hit_ListExportSTEPP <- Hit_List[, c("Accession", "Description", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
+  STEPPSigExport <- step22[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
+  Hit_ListExportSTEPP <- Hit_List[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
 
   print(STEPPSigExport)
   print(paste("There are", STEPP_Number_Of_Hits, "Hits"))
   print(paste("There are", STEPPuniquehits, "Unique Hits"))
-  print(paste(STEPPunique, "Unique Proteins were assayed"))
   print(paste(STEPPuniquePeptide, "Unique Peptides were assayed"))
+  print(paste(STEPPunique, "Unique Proteins were assayed"))
   print(Hit_ListExportSTEPP)
 
   utils::write.table(STEPPExport, file = "STEPPUniqueHits.csv", row.names = FALSE, col.names = FALSE)

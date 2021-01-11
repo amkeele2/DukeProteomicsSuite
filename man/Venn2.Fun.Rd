@@ -7,13 +7,13 @@
 Venn2.Fun(data1, data2, name1, name2)
 }
 \arguments{
-\item{data1}{unqiue hit csv output method 1}
+\item{data1}{Unqiue Hit .csv Output method 1}
 
-\item{data2}{unique hit csv output method 2}
+\item{data2}{Unique Hit .csv Output method 2}
 
-\item{name1}{method 1 name}
+\item{name1}{Method 1 name}
 
-\item{name2}{method 2 name}
+\item{name2}{Method 2 name}
 }
 \value{
 Venn Diagram

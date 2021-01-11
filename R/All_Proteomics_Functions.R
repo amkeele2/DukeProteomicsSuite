@@ -8,13 +8,15 @@
 #' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
 #' @param TMTplex 8, 10, 16 TMTplex (default = 10)
 #' @param plot Display volcano plot (default = TRUE)
-#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param xlab X-axis Label (default = "Z Score")
+#' @param ylab Y-axis Label (default = "- log10 (p value)")
+#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -160,7 +162,7 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 
                                     label = Accession,
                                     colour = Sig_Check_Exp
                                   )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels , values = labelcolor) +
+    ggplot2::labs(x= xlab,y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels , values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -181,13 +183,15 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 
 #' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
 #' @param TMTplex 8, 10, 16 TMTplex (default = 10)
 #' @param plot Display volcano plot (default = TRUE)
-#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param xlab X-axis Label (default = "Z Score")
+#' @param ylab Y-axis Label (default = "- log10 (p value)")
+#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -475,7 +479,7 @@ Volcano_Plot <- ggplot2::ggplot(step22,
            label = Accession,
            colour = Sig_Check_TPP
          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-  ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels ,values = labelcolor) +
+  ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels ,values = labelcolor) +
   ggplot2::expand_limits(x=0, y=0) +
   ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
   ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -496,13 +500,15 @@ print(Volcano_Plot)
 #' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
 #' @param TMTplex 8, 10, 16 TMTplex (default = 10)
 #' @param plot Display volcano plot (default = TRUE)
-#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param xlab X-axis Label (default = "Z Score")
+#' @param ylab Y-axis Label (default = "- log10 (p value)")
+#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -802,7 +808,7 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
                            label = Accession,
                            colour = Sig_Check_SPROX
                          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels, values = labelcolor) +
+    ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels, values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -823,13 +829,15 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
 #' @param p_cutoff A positive integer between 0 and 1 (default = 0.05)
 #' @param TMTplex 8, 10, 16 TMTplex (default = 10)
 #' @param plot Display volcano plot (default = TRUE)
-#' @param labels Name of groups in figure legend (default = c("Not Significant", "Significant))
+#' @param xlab X-axis Label (default = "Z Score")
+#' @param ylab Y-axis Label (default = "- log10 (p value)")
+#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, labels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -1123,7 +1131,7 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
                            label = Accession,
                            colour = Sig_Check_STEPP
                          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-    ggplot2::labs(x="Z Score",y="- log10 (p value)") + ggplot2::scale_colour_manual(breaks = labels, values = labelcolor) +
+    ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels, values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -1139,10 +1147,10 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
 #' This function will make a Venn Diagram showing unique hits for two different proteomics methods
 #'
 #'
-#' @param data1 unqiue hit csv output method 1
-#' @param data2 unique hit csv output method 2
-#' @param name1 method 1 name
-#' @param name2 method 2 name
+#' @param data1 Unqiue Hit .csv Output method 1
+#' @param data2 Unique Hit .csv Output method 2
+#' @param name1 Method 1 name
+#' @param name2 Method 2 name
 #' @return Venn Diagram
 #' @export
 
@@ -1191,10 +1199,12 @@ Venn2.Fun <- function(data1, data2, name1, name2){
 #' This function will make a Venn Diagram showing unique hits for three different proteomics methods
 #'
 #'
-#' @param data1 unqiue hit csv output method 1
-#' @param data2 unique hit csv output method 2
-#' @param name1 method 1 name
-#' @param name2 method 2 name
+#' @param data1 Unqiue Hit .csv Output from method 1
+#' @param data2 Unique Hit .csv Output method 2
+#' @param data3 Unique Hit .csv Output method 3
+#' @param name1 Method 1 name
+#' @param name2 Method 2 name
+#' @param name3 Method 3 name
 #' @return Venn Diagram
 #' @export
 
@@ -1203,7 +1213,7 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
-  z2 <- utils::read.csv2(file = data2, header = FALSE)
+  z2 <- utils::read.csv2(file = data3, header = FALSE)
 
   futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
 
@@ -1219,29 +1229,72 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3){
                             lwd = 2,
                             col= "black",
                             lty = "dotted",
-                            fill = c("cornflowerblue", "darkorchid1", "lightyellow"),
+                            fill = c("cornflowerblue", "darkorchid1", "#ffffba"),
                             alpha = c(0.3, 0.3, 0.3),
-                            cex = 0.65,
+                            cex = 0.5,
                             fontfamily = "serif",
                             cat.cex = 0.5,
                             cat.default.pos = "outer",
                             fontface = "bold",
-                            cat.pos = c(-1, 1),
-                            cat.dist = c(0.055, 0.055, 0.055),
+                            cat.pos = c(-27, 27, 135),
+                            cat.dist = c(0.055, 0.055, 0.085),
                             cat.fontfamily = "serif",
-                            cat.col = c("darkblue", "darkorchid4", "lightyellow"),
+                            cat.col = "black",
                             scaled = FALSE
 
   )
-
-
-
-
 }
 
+#' Four Method Comparison Venn Diagram
+#'
+#' This function will make a Venn Diagram showing unique hits for three different proteomics methods
+#'
+#'
+#' @param data1 Unqiue Hit .csv Output from method 1
+#' @param data2 Unique Hit .csv Output method 2
+#' @param data3 Unique Hit .csv Output method 3
+#' @param data4 Unique Hit .csv Output method 4
+#' @param name1 Method 1 name
+#' @param name2 Method 2 name
+#' @param name3 Method 3 name
+#' @param name4 Method 4 name
+#' @return Venn Diagram
+#' @export
 
 
+Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4){
 
+  z <- utils::read.csv2(file = data1, header = FALSE)
+  z1 <- utils::read.csv2(file = data2, header = FALSE)
+  z2 <- utils::read.csv2(file = data3, header = FALSE)
+  z3 <- utils::read.csv2(file = data4, header = FALSE)
+
+  futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+
+  VennDiagram::venn.diagram(x = c(z, z1, z2, z3),
+                            category.names = c(name1, name2, name3, name4),
+                            filename = 'Four_Comparison_Venn_Diagram.PNG',
+                            output = TRUE ,
+                            imagetype="png" ,
+                            height = 480 ,
+                            width = 480 ,
+                            resolution = 300,
+                            compression = "lzw",
+                            lwd = 2,
+                            col= "black",
+                            fill = c("cornflowerblue", "darkorchid1", "#ffffba", "#90ee90"),
+                            alpha = c(0.3, 0.3, 0.3, 0.3),
+                            cex = 0.5,
+                            fontfamily = "serif",
+                            cat.cex = 0.5,
+                            cat.default.pos = "outer",
+                            fontface = "bold",
+                            cat.fontfamily = "serif",
+                            cat.col = "black",
+                            scaled = FALSE
+
+  )
+}
 
 
 

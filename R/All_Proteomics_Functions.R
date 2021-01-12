@@ -10,13 +10,12 @@
 #' @param plot Display volcano plot (default = TRUE)
 #' @param xlab X-axis Label (default = "Z Score")
 #' @param ylab Y-axis Label (default = "- log10 (p value)")
-#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-ExpressionLevel.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+ExpressionLevel.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -162,7 +161,7 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05,
                                     label = Accession,
                                     colour = Sig_Check_Exp
                                   )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-    ggplot2::labs(x= xlab,y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels , values = labelcolor) +
+    ggplot2::labs(x= xlab,y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant") , values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -185,13 +184,12 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05,
 #' @param plot Display volcano plot (default = TRUE)
 #' @param xlab X-axis Label (default = "Z Score")
 #' @param ylab Y-axis Label (default = "- log10 (p value)")
-#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -479,7 +477,7 @@ Volcano_Plot <- ggplot2::ggplot(step22,
            label = Accession,
            colour = Sig_Check_TPP
          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-  ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels ,values = labelcolor) +
+  ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant") ,values = labelcolor) +
   ggplot2::expand_limits(x=0, y=0) +
   ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
   ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -502,13 +500,12 @@ print(Volcano_Plot)
 #' @param plot Display volcano plot (default = TRUE)
 #' @param xlab X-axis Label (default = "Z Score")
 #' @param ylab Y-axis Label (default = "- log10 (p value)")
-#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -808,7 +805,7 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff 
                            label = Accession,
                            colour = Sig_Check_SPROX
                          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-    ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels, values = labelcolor) +
+    ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant"), values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
@@ -831,13 +828,12 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff 
 #' @param plot Display volcano plot (default = TRUE)
 #' @param xlab X-axis Label (default = "Z Score")
 #' @param ylab Y-axis Label (default = "- log10 (p value)")
-#' @param legendlabels Name of groups in figure legend (default = c("Not Significant", "Significant))
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -1132,7 +1128,7 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05
                            label = Accession,
                            colour = Sig_Check_STEPP
                          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
-    ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = legendlabels, values = labelcolor) +
+    ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant"), values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())

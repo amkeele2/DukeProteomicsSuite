@@ -15,6 +15,7 @@ Venn3.Fun(
   imagetype = "png",
   textcolor = "black",
   outlinetype = "dotted",
+  outlinewidth = 1,
   areafill = c("#6495ed", "#bf3eff", "#ffffba"),
   alpha = c(0.3, 0.3, 0.3),
   arealabelsize = 0.5,
@@ -42,6 +43,8 @@ Venn3.Fun(
 \item{textcolor}{Color of Circle's Circumference (default = black)}
 
 \item{outlinetype}{Circle Outline Dash pattern (default = dotted)}
+
+\item{outlinewidth}{Circle Outline Thickness (default = 1)}
 
 \item{areafill}{Color of Circles (default = c("#6495ed", "#bf3eff", "#ffffba"))}
 

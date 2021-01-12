@@ -951,7 +951,6 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05
 
 
   STEPP_Confidence <- STEPP_Raw[STEPP_Raw$Confidence == "High",]
-  print(STEPP_Confidence)
 
   STEPP_Semi_Tryp <- dplyr::filter(STEPP_Confidence, grepl("1xTMT6plex [N-Term]", Modifications, fixed = TRUE))
 

@@ -16,7 +16,7 @@
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+ExpressionLevel.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -191,7 +191,7 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff, p_cutoff, TMTplex = 
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+OnePotTPP.Fun <- function(Expression_data, TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -508,7 +508,7 @@ print(Volcano_Plot)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -837,7 +837,7 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff, p_cutoff, TMT
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
+STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", legendlabels = c("Not Significant", "Significant"), labelcolor = c("grey", "red"), alpha = 0.5){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")

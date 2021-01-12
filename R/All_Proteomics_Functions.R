@@ -1150,13 +1150,23 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
 #'
 #' @param data1 Unqiue Hit .csv Output method 1
 #' @param data2 Unique Hit .csv Output method 2
-#' @param name1 Method 1 name
-#' @param name2 Method 2 name
+#' @param name1 Method 1 Name
+#' @param name2 Method 2 Name
+#' @param filename Filename for Output (default = 'Two_Comparison_Venn_Diagram')
+#' @param imagetype Image Output Extension (default = png)
+#' @param textcolor Color of Circle's Circumference (default = black)
+#' @param outlinetype Circle Outline Dash pattern (default = dotted)
+#' @param areafill Color of Circles (default = c("#6495ed", "#bf3eff"))
+#' @param alpha Transparency of Circles (default = 0.3)
+#' @param arealabelsize Size of Area Labels (default = 0.65)
+#' @param categorynamesize Size of Category Names (default = 0.5)
+#' @param categorycolor Color of Category Names (default = black)
 #' @return Venn Diagram
 #' @export
 
 
-Venn2.Fun <- function(data1, data2, name1, name2){
+Venn2.Fun <- function(data1, data2, name1, name2, filename = 'Two_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", areafill = c("#6495ed", "#bf3eff"),
+                      alpha = c(0.3,0.3), arealabelsize = 0.65, categorynamesize = 0.5, categorycolor = "black"){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
@@ -1165,27 +1175,27 @@ Venn2.Fun <- function(data1, data2, name1, name2){
 
   VennDiagram::venn.diagram(x = c(z, z1),
                category.names = c(name1, name2),
-               filename = 'Two_Comparison_Venn_Diagram.PNG',
+               filename = filename,
                output = TRUE ,
-               imagetype="png" ,
+               imagetype= imagetype ,
                height = 480 ,
                width = 480 ,
                resolution = 300,
                compression = "lzw",
                lwd = 2,
-               col= "black",
-               lty = "dotted",
-               fill = c("cornflowerblue", "darkorchid1"),
-               alpha = c(0.3, 0.3),
-               cex = 0.65,
+               col= textcolor,
+               lty = outlinetype,
+               fill = areafill,
+               alpha = alpha,
+               cex = arealabelsize,
                fontfamily = "serif",
-               cat.cex = 0.5,
+               cat.cex = categorynamesize,
                cat.default.pos = "outer",
                fontface = "bold",
                cat.pos = c(-1, 1),
                cat.dist = c(0.055, 0.055),
                cat.fontfamily = "serif",
-               cat.col = c("darkblue", "darkorchid4"),
+               cat.col = categorycolor,
                scaled = FALSE
 
   )
@@ -1200,17 +1210,27 @@ Venn2.Fun <- function(data1, data2, name1, name2){
 #' This function will make a Venn Diagram showing unique hits for three different proteomics methods
 #'
 #'
-#' @param data1 Unqiue Hit .csv Output from method 1
+#' @param data1 Unqiue Hit .csv Output method 1
 #' @param data2 Unique Hit .csv Output method 2
 #' @param data3 Unique Hit .csv Output method 3
-#' @param name1 Method 1 name
-#' @param name2 Method 2 name
-#' @param name3 Method 3 name
+#' @param name1 Method 1 Name
+#' @param name2 Method 2 Name
+#' @param name3 Method 3 Name
+#' @param filename Filename for Output (default = 'Three_Comparison_Venn_Diagram')
+#' @param imagetype Image Output Extension (default = png)
+#' @param textcolor Color of Circle's Circumference (default = black)
+#' @param outlinetype Circle Outline Dash pattern (default = dotted)
+#' @param areafill Color of Circles (default = c("#6495ed", "#bf3eff", "#ffffba"))
+#' @param alpha Transparency of Circles (default = 0.3)
+#' @param arealabelsize Size of Area Labels (default = 0.5)
+#' @param categorynamesize Size of Category Names (default = 0.5)
+#' @param categorycolor Color of Category Names (default = black)
 #' @return Venn Diagram
 #' @export
 
 
-Venn3.Fun <- function(data1, data2, data3, name1, name2, name3){
+Venn3.Fun <- function(data1, data2, data3, name1, name2, name3, filename = 'Three_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", areafill = c("#6495ed", "#bf3eff", "#ffffba"),
+                      alpha = c(0.3,0.3, 0.3), arealabelsize = 0.5, categorynamesize = 0.5, categorycolor = "black"){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
@@ -1220,27 +1240,27 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3){
 
   VennDiagram::venn.diagram(x = c(z, z1, z2),
                             category.names = c(name1, name2, name3),
-                            filename = 'Three_Comparison_Venn_Diagram.PNG',
+                            filename = filename,
                             output = TRUE ,
-                            imagetype="png" ,
+                            imagetype= imagetype ,
                             height = 480 ,
                             width = 480 ,
                             resolution = 300,
                             compression = "lzw",
                             lwd = 2,
-                            col= "black",
-                            lty = "dotted",
-                            fill = c("cornflowerblue", "darkorchid1", "#ffffba"),
-                            alpha = c(0.3, 0.3, 0.3),
-                            cex = 0.5,
+                            col= textcolor,
+                            lty = outlinetype,
+                            fill = fill,
+                            alpha = alpha,
+                            cex = arealabelsize,
                             fontfamily = "serif",
-                            cat.cex = 0.5,
+                            cat.cex = categorynamesize,
                             cat.default.pos = "outer",
                             fontface = "bold",
                             cat.pos = c(-27, 27, 135),
                             cat.dist = c(0.055, 0.055, 0.085),
                             cat.fontfamily = "serif",
-                            cat.col = "black",
+                            cat.col = categorycolor,
                             scaled = FALSE
 
   )
@@ -1251,19 +1271,29 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3){
 #' This function will make a Venn Diagram showing unique hits for three different proteomics methods
 #'
 #'
-#' @param data1 Unqiue Hit .csv Output from method 1
+#' @param data1 Unqiue Hit .csv Output method 1
 #' @param data2 Unique Hit .csv Output method 2
 #' @param data3 Unique Hit .csv Output method 3
 #' @param data4 Unique Hit .csv Output method 4
-#' @param name1 Method 1 name
-#' @param name2 Method 2 name
-#' @param name3 Method 3 name
-#' @param name4 Method 4 name
+#' @param name1 Method 1 Name
+#' @param name2 Method 2 Name
+#' @param name3 Method 3 Name
+#' @param name4 Method 4 Name
+#' @param filename Filename for Output (default = 'Four_Comparison_Venn_Diagram')
+#' @param imagetype Image Output Extension (default = png)
+#' @param textcolor Color of Circle's Circumference (default = black)
+#' @param outlinetype Circle Outline Dash pattern (default = dotted)
+#' @param areafill Color of Circles (default = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"))
+#' @param alpha Transparency of Circles (default = 0.3)
+#' @param arealabelsize Size of Area Labels (default = 0.5)
+#' @param categorynamesize Size of Category Names (default = 0.5)
+#' @param categorycolor Color of Category Names (default = black)
 #' @return Venn Diagram
 #' @export
 
 
-Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4){
+Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4, filename = 'Four_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", areafill = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"),
+                      alpha = c(0.3,0.3, 0.3, 0.3), arealabelsize = 0.5, categorynamesize = 0.5, categorycolor = "black"){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
@@ -1274,24 +1304,24 @@ Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4){
 
   VennDiagram::venn.diagram(x = c(z, z1, z2, z3),
                             category.names = c(name1, name2, name3, name4),
-                            filename = 'Four_Comparison_Venn_Diagram.PNG',
+                            filename = filename,
                             output = TRUE ,
-                            imagetype="png" ,
+                            imagetype= imagetype ,
                             height = 480 ,
                             width = 480 ,
                             resolution = 300,
                             compression = "lzw",
                             lwd = 2,
-                            col= "black",
-                            fill = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"),
-                            alpha = c(0.3, 0.3, 0.3, 0.3),
-                            cex = 0.5,
+                            col= textcolor,
+                            fill = fill,
+                            alpha = alpha,
+                            cex = arealabelsize,
                             fontfamily = "serif",
-                            cat.cex = 0.5,
+                            cat.cex = categorynamesize,
                             cat.default.pos = "outer",
                             fontface = "bold",
                             cat.fontfamily = "serif",
-                            cat.col = "black",
+                            cat.col = categorycolor,
                             scaled = FALSE
 
   )

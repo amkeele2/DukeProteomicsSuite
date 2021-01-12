@@ -4,16 +4,48 @@
 \alias{Venn2.Fun}
 \title{Two Method Comparison Venn Diagram}
 \usage{
-Venn2.Fun(data1, data2, name1, name2)
+Venn2.Fun(
+  data1,
+  data2,
+  name1,
+  name2,
+  filename = "Two_Comparison_Venn_Diagram.PNG",
+  imagetype = "png",
+  textcolor = "black",
+  outlinetype = "dotted",
+  areafill = c("#6495ed", "#bf3eff"),
+  alpha = c(0.3, 0.3),
+  arealabelsize = 0.65,
+  categorynamesize = 0.5,
+  categorycolor = "black"
+)
 }
 \arguments{
 \item{data1}{Unqiue Hit .csv Output method 1}
 
 \item{data2}{Unique Hit .csv Output method 2}
 
-\item{name1}{Method 1 name}
+\item{name1}{Method 1 Name}
 
-\item{name2}{Method 2 name}
+\item{name2}{Method 2 Name}
+
+\item{filename}{Filename for Output (default = 'Two_Comparison_Venn_Diagram')}
+
+\item{imagetype}{Image Output Extension (default = png)}
+
+\item{textcolor}{Color of Circle's Circumference (default = black)}
+
+\item{outlinetype}{Circle Outline Dash pattern (default = dotted)}
+
+\item{areafill}{Color of Circles (default = c("#6495ed", "#bf3eff"))}
+
+\item{alpha}{Transparency of Circles (default = 0.3)}
+
+\item{arealabelsize}{Size of Area Labels (default = 0.65)}
+
+\item{categorynamesize}{Size of Category Names (default = 0.5)}
+
+\item{categorycolor}{Color of Category Names (default = black)}
 }
 \value{
 Venn Diagram

@@ -4,20 +4,54 @@
 \alias{Venn3.Fun}
 \title{Three Method Comparison Venn Diagram}
 \usage{
-Venn3.Fun(data1, data2, data3, name1, name2, name3)
+Venn3.Fun(
+  data1,
+  data2,
+  data3,
+  name1,
+  name2,
+  name3,
+  filename = "Three_Comparison_Venn_Diagram.PNG",
+  imagetype = "png",
+  textcolor = "black",
+  outlinetype = "dotted",
+  areafill = c("#6495ed", "#bf3eff", "#ffffba"),
+  alpha = c(0.3, 0.3, 0.3),
+  arealabelsize = 0.5,
+  categorynamesize = 0.5,
+  categorycolor = "black"
+)
 }
 \arguments{
-\item{data1}{Unqiue Hit .csv Output from method 1}
+\item{data1}{Unqiue Hit .csv Output method 1}
 
 \item{data2}{Unique Hit .csv Output method 2}
 
 \item{data3}{Unique Hit .csv Output method 3}
 
-\item{name1}{Method 1 name}
+\item{name1}{Method 1 Name}
 
-\item{name2}{Method 2 name}
+\item{name2}{Method 2 Name}
 
-\item{name3}{Method 3 name}
+\item{name3}{Method 3 Name}
+
+\item{filename}{Filename for Output (default = 'Three_Comparison_Venn_Diagram')}
+
+\item{imagetype}{Image Output Extension (default = png)}
+
+\item{textcolor}{Color of Circle's Circumference (default = black)}
+
+\item{outlinetype}{Circle Outline Dash pattern (default = dotted)}
+
+\item{areafill}{Color of Circles (default = c("#6495ed", "#bf3eff", "#ffffba"))}
+
+\item{alpha}{Transparency of Circles (default = 0.3)}
+
+\item{arealabelsize}{Size of Area Labels (default = 0.5)}
+
+\item{categorynamesize}{Size of Category Names (default = 0.5)}
+
+\item{categorycolor}{Color of Category Names (default = black)}
 }
 \value{
 Venn Diagram

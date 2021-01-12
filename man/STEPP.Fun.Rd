@@ -7,13 +7,12 @@
 STEPP.Fun(
   Expression_data,
   STEPP_Raw,
-  SD_cutoff,
-  p_cutoff,
+  SD_cutoff = 2,
+  p_cutoff = 0.05,
   TMTplex = 10,
   plot = TRUE,
   xlab = "Z Score",
   ylab = "- log10 (p value)",
-  legendlabels = c("Not Significant", "Significant"),
   labelcolor = c("grey", "red"),
   alpha = 0.5
 )
@@ -32,8 +31,6 @@ STEPP.Fun(
 \item{xlab}{X-axis Label (default = "Z Score")}
 
 \item{ylab}{Y-axis Label (default = "- log10 (p value)")}
-
-\item{legendlabels}{Name of groups in figure legend (default = c("Not Significant", "Significant))}
 
 \item{labelcolor}{Color of Not significant and Significant data points (default = c("grey", "red"))}
 

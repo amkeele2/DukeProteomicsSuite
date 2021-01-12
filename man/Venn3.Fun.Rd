@@ -20,7 +20,8 @@ Venn3.Fun(
   alpha = c(0.3, 0.3, 0.3),
   arealabelsize = 0.5,
   categorynamesize = 0.5,
-  categorycolor = "black"
+  categorycolor = "black",
+  scaled = FALSE
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ Venn3.Fun(
 \item{categorynamesize}{Size of Category Names (default = 0.5)}
 
 \item{categorycolor}{Color of Category Names (default = black)}
+
+\item{scaled}{If TRUE Circle area will scale based on value (default = FALSE)}
 }
 \value{
 Venn Diagram

@@ -1156,17 +1156,19 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff, p_cutoff, TMTplex =
 #' @param imagetype Image Output Extension (default = png)
 #' @param textcolor Color of Circle's Circumference (default = black)
 #' @param outlinetype Circle Outline Dash pattern (default = dotted)
+#' @param outlinewidth Circle Outline Thickness (default = 1)
 #' @param areafill Color of Circles (default = c("#6495ed", "#bf3eff"))
 #' @param alpha Transparency of Circles (default = 0.3)
 #' @param arealabelsize Size of Area Labels (default = 0.65)
 #' @param categorynamesize Size of Category Names (default = 0.5)
 #' @param categorycolor Color of Category Names (default = black)
+#' @param scaled If TRUE Circle area will scale based on value (default = FALSE)
 #' @return Venn Diagram
 #' @export
 
 
-Venn2.Fun <- function(data1, data2, name1, name2, filename = 'Two_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", areafill = c("#6495ed", "#bf3eff"),
-                      alpha = c(0.3,0.3), arealabelsize = 0.65, categorynamesize = 0.5, categorycolor = "black"){
+Venn2.Fun <- function(data1, data2, name1, name2, filename = 'Two_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", outlinewidth =1, areafill = c("#6495ed", "#bf3eff"),
+                      alpha = c(0.3,0.3), arealabelsize = 0.65, categorynamesize = 0.5, categorycolor = "black", scaled = FALSE){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
@@ -1182,8 +1184,8 @@ Venn2.Fun <- function(data1, data2, name1, name2, filename = 'Two_Comparison_Ven
                width = 480 ,
                resolution = 300,
                compression = "lzw",
-               lwd = 2,
-               col= textcolor,
+               lwd = outlinewidth,
+               col= categorycolor,
                lty = outlinetype,
                fill = areafill,
                alpha = alpha,
@@ -1195,8 +1197,8 @@ Venn2.Fun <- function(data1, data2, name1, name2, filename = 'Two_Comparison_Ven
                cat.pos = c(-1, 1),
                cat.dist = c(0.055, 0.055),
                cat.fontfamily = "serif",
-               cat.col = categorycolor,
-               scaled = FALSE
+               cat.col = textcolor,
+               scaled = scaled
 
   )
 
@@ -1220,17 +1222,19 @@ Venn2.Fun <- function(data1, data2, name1, name2, filename = 'Two_Comparison_Ven
 #' @param imagetype Image Output Extension (default = png)
 #' @param textcolor Color of Circle's Circumference (default = black)
 #' @param outlinetype Circle Outline Dash pattern (default = dotted)
+#' @param outlinewidth Circle Outline Thickness (default = 1)
 #' @param areafill Color of Circles (default = c("#6495ed", "#bf3eff", "#ffffba"))
 #' @param alpha Transparency of Circles (default = 0.3)
 #' @param arealabelsize Size of Area Labels (default = 0.5)
 #' @param categorynamesize Size of Category Names (default = 0.5)
 #' @param categorycolor Color of Category Names (default = black)
+#' @param scaled If TRUE Circle area will scale based on value (default = FALSE)
 #' @return Venn Diagram
 #' @export
 
 
-Venn3.Fun <- function(data1, data2, data3, name1, name2, name3, filename = 'Three_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", areafill = c("#6495ed", "#bf3eff", "#ffffba"),
-                      alpha = c(0.3,0.3, 0.3), arealabelsize = 0.5, categorynamesize = 0.5, categorycolor = "black"){
+Venn3.Fun <- function(data1, data2, data3, name1, name2, name3, filename = 'Three_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", outlinewidth = 1, areafill = c("#6495ed", "#bf3eff", "#ffffba"),
+                      alpha = c(0.3,0.3, 0.3), arealabelsize = 0.5, categorynamesize = 0.5, categorycolor = "black", scaled = FALSE){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
@@ -1247,10 +1251,10 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3, filename = 'Thre
                             width = 480 ,
                             resolution = 300,
                             compression = "lzw",
-                            lwd = 2,
-                            col= textcolor,
+                            lwd = outlinewidth,
+                            col= categorycolor,
                             lty = outlinetype,
-                            fill = fill,
+                            fill = areafill,
                             alpha = alpha,
                             cex = arealabelsize,
                             fontfamily = "serif",
@@ -1260,8 +1264,8 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3, filename = 'Thre
                             cat.pos = c(-27, 27, 135),
                             cat.dist = c(0.055, 0.055, 0.085),
                             cat.fontfamily = "serif",
-                            cat.col = categorycolor,
-                            scaled = FALSE
+                            cat.col = textcolor,
+                            scaled = scaled
 
   )
 }
@@ -1283,17 +1287,19 @@ Venn3.Fun <- function(data1, data2, data3, name1, name2, name3, filename = 'Thre
 #' @param imagetype Image Output Extension (default = png)
 #' @param textcolor Color of Circle's Circumference (default = black)
 #' @param outlinetype Circle Outline Dash pattern (default = dotted)
+#' @param outlinewidth Circle Outline Thickness (default = 1)
 #' @param areafill Color of Circles (default = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"))
 #' @param alpha Transparency of Circles (default = 0.3)
 #' @param arealabelsize Size of Area Labels (default = 0.5)
 #' @param categorynamesize Size of Category Names (default = 0.5)
 #' @param categorycolor Color of Category Names (default = black)
+#' @param scaled If TRUE Circle area will scale based on value (default = FALSE)
 #' @return Venn Diagram
 #' @export
 
 
-Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4, filename = 'Four_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", areafill = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"),
-                      alpha = c(0.3,0.3, 0.3, 0.3), arealabelsize = 0.5, categorynamesize = 0.5, categorycolor = "black"){
+Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4, filename = 'Four_Comparison_Venn_Diagram.PNG', imagetype = "png", textcolor = "black", outlinetype = "dotted", outlinewidth = 1, areafill = c("#6495ed", "#bf3eff", "#ffffba", "#90ee90"),
+                      alpha = c(0.3,0.3, 0.3, 0.3), arealabelsize = 0.5, categorynamesize = 0.5, categorycolor = "black", scaled = FALSE){
 
   z <- utils::read.csv2(file = data1, header = FALSE)
   z1 <- utils::read.csv2(file = data2, header = FALSE)
@@ -1311,9 +1317,10 @@ Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4, fi
                             width = 480 ,
                             resolution = 300,
                             compression = "lzw",
-                            lwd = 2,
-                            col= textcolor,
-                            fill = fill,
+                            lwd = outlinewidth,
+                            col= categorycolor,
+                            lty = outlinetype,
+                            fill = areafill,
                             alpha = alpha,
                             cex = arealabelsize,
                             fontfamily = "serif",
@@ -1321,8 +1328,8 @@ Venn4.Fun <- function(data1, data2, data3, data4, name1, name2, name3, name4, fi
                             cat.default.pos = "outer",
                             fontface = "bold",
                             cat.fontfamily = "serif",
-                            cat.col = categorycolor,
-                            scaled = FALSE
+                            cat.col = textcolor,
+                            scaled = scaled
 
   )
 }

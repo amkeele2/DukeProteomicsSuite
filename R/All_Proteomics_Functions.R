@@ -163,6 +163,7 @@ ExpressionLevel.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05,
                                   )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
     ggplot2::labs(x= xlab,y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant") , values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
+    ggplot2::scale_x_continuous(breaks = -12:12) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 
@@ -479,6 +480,7 @@ Volcano_Plot <- ggplot2::ggplot(step22,
          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
   ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant") ,values = labelcolor) +
   ggplot2::expand_limits(x=0, y=0) +
+  ggplot2::scale_x_continuous(breaks = -12:12) +
   ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
   ggplot2::theme(legend.title = ggplot2::element_blank())
 
@@ -807,6 +809,7 @@ OnePotSPROX.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff 
                          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
     ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant"), values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
+    ggplot2::scale_x_continuous(breaks = -12:12) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 
@@ -1129,6 +1132,7 @@ STEPP.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05
                          )) + ggplot2::geom_point(size = 1.5, alpha = alpha) +
     ggplot2::labs(x= xlab, y= ylab) + ggplot2::scale_colour_manual(breaks = c("Not Significant", "Significant"), values = labelcolor) +
     ggplot2::expand_limits(x=0, y=0) +
+    ggplot2::scale_x_continuous(breaks = -12:12) +
     ggplot2::theme_bw()+ ggplot2::theme(panel.border = ggplot2::element_blank(), panel.grid.major = ggplot2::element_blank(),panel.grid.minor = ggplot2::element_blank(), axis.line = ggplot2::element_line(colour = "black")) +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 

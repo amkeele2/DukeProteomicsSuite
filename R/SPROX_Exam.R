@@ -1,11 +1,11 @@
-#' Yeast Lysate with addition of CyclosporineA OnePotTPP Ligand TMT10plex
+#' Yeast Lysate with addition of CyclosporineA OnePotSPROX Ligand TMT10plex
 #'
-#' Yeast Lysate with addition of CyclosporineA OnePotTPP Ligand
+#' Yeast Lysate with addition of CyclosporineA OnePotSPROX Ligand
 #' TMT10plex Proteome Discoverer (v. 2.2) output
 #'
 #' @docType data
 #'
-#' @usage data(TPPExample_Ligand)
+#' @usage data(SPROXExample_Ligand)
 #'
 #' @format An object of class \code{"cross"}; see \code{\link[qtl]{read.cross}}.
 #'

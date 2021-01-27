@@ -13,10 +13,12 @@
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -120,11 +122,23 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
   Log_10_Exp <- step9$log_10_Exp
   Hit_ident_Exp <- cbind(Hit_ident1_Exp, Log_Avg_Exp, Log_10_Exp, Log_2_Exp_1, Log_2_Exp_2, Log_2_Exp_3, Log_2_Exp_4, Log_2_Exp_5, z_score_Exp)
 
+  Expunique <- dplyr::n_distinct(step9$Accession)
+
+  if (correctedpvalue == FALSE){
   n1 <-
     (Hit_ident_Exp$z_score_Exp > SD_cutoff &
        Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff)) |
     (Hit_ident_Exp$z_score_Exp < -SD_cutoff & Hit_ident_Exp$Log_10_Exp > -log10(p_cutoff))
   n2 <- as.data.frame(n1)
+  }
+
+  if (correctedpvalue == TRUE){
+    n1 <-
+      (Hit_ident_Exp$z_score_Exp > SD_cutoff &
+         Hit_ident_Exp$Log_10_Exp > -log10((p_cutoff/Expunique))) |
+      (Hit_ident_Exp$z_score_Exp < -SD_cutoff & Hit_ident_Exp$Log_10_Exp > -log10((p_cutoff/Expunique)))
+    n2 <- as.data.frame(n1)
+  }
 
   Sig_Check_Exp <-
     dplyr::if_else(n2$n1 == "TRUE", "Significant", "Not Significant")
@@ -136,8 +150,8 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
   abkk <- (ddkd == "Significant")
   Exp_Number_Of_Hits <- length(which(abkk))
 
+
   Hit_List <- step10[step10$Sig_Check_Exp == "Significant", ]
-  Expunique <- dplyr::n_distinct(step10$Accession)
   ExpExport <- unique(Hit_List$Accession)
   ExpSigExport <- step10[, c("Accession", "Description", "z_score_Exp", "p_value_Exp", "Sig_Check_Exp")]
   Hit_ListExport <- Hit_List[, c("Accession", "Description", "z_score_Exp", "p_value_Exp", "Sig_Check_Exp")]
@@ -173,6 +187,10 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
 
 ggplot2::ggsave("Volcano_Plot_Expression_Phenotype.png", plot = Volcano_Plot)
 
+if (interactiveplot == TRUE){
+  plotly::ggplotly(Volcano_Plot)
+}
+
 }
 
 #' OnePotTPP Phenotype Analysis
@@ -191,10 +209,12 @@ ggplot2::ggsave("Volcano_Plot_Expression_Phenotype.png", plot = Volcano_Plot)
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-OnePotTPP_Phenotype.Fun <- function(Expression_data, TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+OnePotTPP_Phenotype.Fun <- function(Expression_data, TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -438,11 +458,23 @@ TPP_Hit_ident <- cbind(TPP_Hit_ident1, TPP_Log_Avg, TPP_log_10)
 
 # Step 22
 
+if (correctedpvalue == FALSE){
+
 nk1 <-
   (TPP_Hit_ident$z_score_TPP > SD_cutoff &
      TPP_Hit_ident$TPP_log_10 > -log10(p_cutoff)) |
   (TPP_Hit_ident$z_score_TPP < -SD_cutoff & TPP_Hit_ident$TPP_log_10 > -log10(p_cutoff))
 nk2 <- as.data.frame(nk1)
+}
+
+if (correctedpvalue == TRUE){
+  nk1 <-
+    (TPP_Hit_ident$z_score_TPP > SD_cutoff &
+       TPP_Hit_ident$TPP_log_10 > -log10((p_cutoff/TPPunique))) |
+    (TPP_Hit_ident$z_score_TPP < -SD_cutoff & TPP_Hit_ident$TPP_log_10 > -log10((p_cutoff/TPPunique)))
+  nk2 <- as.data.frame(nk1)
+
+}
 
 Sig_Check_TPP <-
   dplyr::if_else(nk2$nk1 == "TRUE", "Significant", "Not Significant")
@@ -493,7 +525,14 @@ print(Volcano_Plot)
 
 ggplot2::ggsave("Volcano_Plot_TPP_Phenotype.png", plot = Volcano_Plot)
 
+
+
+if (interactiveplot == TRUE){
+  plotly::ggplotly(Volcano_Plot)
 }
+
+}
+
 
 #' OnePotTPP Ligand Analysis
 #'
@@ -511,10 +550,12 @@ ggplot2::ggsave("Volcano_Plot_TPP_Phenotype.png", plot = Volcano_Plot)
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed, and Unique protein hits
 #' @export
 
-OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -649,13 +690,25 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
 
   # Step 22
 
+if (correctedpvalue == FALSE){
+
   nk1 <-
     (TPP_Hit_ident$z_score_TPP > SD_cutoff &
        TPP_Hit_ident$TPP_log_10 > -log10(p_cutoff)) |
     (TPP_Hit_ident$z_score_TPP < -SD_cutoff & TPP_Hit_ident$TPP_log_10 > -log10(p_cutoff))
   nk2 <- as.data.frame(nk1)
 
-  Sig_Check_TPP <-
+}
+
+  if (correctedpvalue == TRUE){
+    nk1 <-
+      (TPP_Hit_ident$z_score_TPP > SD_cutoff &
+         TPP_Hit_ident$TPP_log_10 > -log10((p_cutoff/TPPunique))) |
+      (TPP_Hit_ident$z_score_TPP < -SD_cutoff & TPP_Hit_ident$TPP_log_10 > -log10((p_cutoff/TPPunique)))
+    nk2 <- as.data.frame(nk1)
+  }
+
+    Sig_Check_TPP <-
     dplyr::if_else(nk2$nk1 == "TRUE", "Significant", "Not Significant")
   step22 <- cbind(TPP_Hit_ident, Sig_Check_TPP)
 
@@ -704,6 +757,11 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
 
   ggplot2::ggsave("Volcano_Plot_TPP_Ligand.png", plot = Volcano_Plot)
 
+  if (interactiveplot == TRUE){
+    plotly::ggplotly(Volcano_Plot)
+  }
+
+
 }
 
 
@@ -723,10 +781,12 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -981,11 +1041,24 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
 
   # Step 22
 
+  if (correctedpvalue == FALSE){
+
   nk1 <-
     (SPROX_Hit_ident$z_score_SPROX > SD_cutoff &
        SPROX_Hit_ident$SPROX_log_10 > -log10(p_cutoff)) |
     (SPROX_Hit_ident$z_score_SPROX < -SD_cutoff & SPROX_Hit_ident$SPROX_log_10 > -log10(p_cutoff))
   nk2 <- as.data.frame(nk1)
+
+  }
+
+  if (correctedpvalue == TRUE){
+    nk1 <-
+      (SPROX_Hit_ident$z_score_SPROX > SD_cutoff &
+         SPROX_Hit_ident$SPROX_log_10 > -log10((p_cutoff/SPROXuniquePep))) |
+      (SPROX_Hit_ident$z_score_SPROX < -SD_cutoff & SPROX_Hit_ident$SPROX_log_10 > -log10((p_cutoff/SPROXuniquePep)))
+    nk2 <- as.data.frame(nk1)
+
+  }
 
   Sig_Check_SPROX <-
     dplyr::if_else(nk2$nk1 == "TRUE", "Significant", "Not Significant")
@@ -1037,6 +1110,10 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
 
 ggplot2::ggsave("Volcano_Plot_SPROX_Phenotype.png", plot = Volcano_Plot)
 
+if (interactiveplot == TRUE){
+  plotly::ggplotly(Volcano_Plot)
+}
+
 }
 
 
@@ -1056,10 +1133,12 @@ ggplot2::ggsave("Volcano_Plot_SPROX_Phenotype.png", plot = Volcano_Plot)
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -1203,11 +1282,24 @@ OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TM
 
   # Step 22
 
+  if (correctedpvalue == FALSE){
+
   nk1 <-
     (SPROX_Hit_ident$z_score_SPROX > SD_cutoff &
        SPROX_Hit_ident$SPROX_log_10 > -log10(p_cutoff)) |
     (SPROX_Hit_ident$z_score_SPROX < -SD_cutoff & SPROX_Hit_ident$SPROX_log_10 > -log10(p_cutoff))
   nk2 <- as.data.frame(nk1)
+
+  }
+
+  if (correctedpvalue == TRUE){
+    nk1 <-
+      (SPROX_Hit_ident$z_score_SPROX > SD_cutoff &
+         SPROX_Hit_ident$SPROX_log_10 > -log10((p_cutoff/SPROXuniquePep))) |
+  (SPROX_Hit_ident$z_score_SPROX < -SD_cutoff & SPROX_Hit_ident$SPROX_log_10 > -log10((p_cutoff/SPROXuniquePep)))
+nk2 <- as.data.frame(nk1)
+
+  }
 
   Sig_Check_SPROX <-
     dplyr::if_else(nk2$nk1 == "TRUE", "Significant", "Not Significant")
@@ -1259,6 +1351,10 @@ OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TM
 
   ggplot2::ggsave("Volcano_Plot_SPROX_Ligand.png", plot = Volcano_Plot)
 
+  if (interactiveplot == TRUE){
+    plotly::ggplotly(Volcano_Plot)
+  }
+
 }
 
 
@@ -1279,10 +1375,12 @@ OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TM
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -1532,11 +1630,25 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
 
   # Step 22
 
+  if (correctedpvalue == FALSE){
+
   nk1 <-
     (STEPP_Hit_ident$z_score_STEPP > SD_cutoff &
        STEPP_Hit_ident$STEPP_log_10 > -log10(p_cutoff)) |
     (STEPP_Hit_ident$z_score_STEPP < -SD_cutoff & STEPP_Hit_ident$STEPP_log_10 > -log10(p_cutoff))
   nk2 <- as.data.frame(nk1)
+
+  }
+
+  if (correctedpvalue == TRUE){
+    nk1 <-
+      (STEPP_Hit_ident$z_score_STEPP > SD_cutoff &
+         STEPP_Hit_ident$STEPP_log_10 > -log10((p_cutoff/STEPPuniquePeptide))) |
+  (STEPP_Hit_ident$z_score_STEPP < -SD_cutoff & STEPP_Hit_ident$STEPP_log_10 > -log10((p_cutoff/STEPPuniquePeptide)))
+nk2 <- as.data.frame(nk1)
+
+  }
+
 
   Sig_Check_STEPP <-
     dplyr::if_else(nk2$nk1 == "TRUE", "Significant", "Not Significant")
@@ -1587,6 +1699,10 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
 
 ggplot2::ggsave("Volcano_Plot_STEPP_Phenotype.png", plot = Volcano_Plot)
 
+if (interactiveplot == TRUE){
+  plotly::ggplotly(Volcano_Plot)
+}
+
 }
 
 
@@ -1606,10 +1722,12 @@ ggplot2::ggsave("Volcano_Plot_STEPP_Phenotype.png", plot = Volcano_Plot)
 #' @param labelcolor Color of Not significant and Significant data points (default = c("grey", "red"))
 #' @param alpha Transparency of plot (default = 0.5)
 #' @param plottextsize Text Size of plot (default = 12)
+#' @param correctedpvalue Bonferroni corrected p-value (default = FALSE)
+#' @param interactiveplot Plotly interactive Volcano plot (default = FALSE)
 #' @return Volcano plot, Hit list, Total proteins assayed and Unique protein hits
 #' @export
 
-STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12){
+STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex = 10, plot = TRUE, xlab = "Z Score", ylab = "- log10 (p value)", labelcolor = c("grey", "red"), alpha = 0.5, plottextsize = 12, correctedpvalue = FALSE, interactiveplot = FALSE){
 
   if (TMTplex !=10)
     stop("This TMTplex is not yet supported in this version.\n")
@@ -1748,11 +1866,24 @@ STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex 
 
   # Step 22
 
+  if (correctedpvalue == FALSE){
+
   nk1 <-
     (STEPP_Hit_ident$z_score_STEPP > SD_cutoff &
        STEPP_Hit_ident$STEPP_log_10 > -log10(p_cutoff)) |
     (STEPP_Hit_ident$z_score_STEPP < -SD_cutoff & STEPP_Hit_ident$STEPP_log_10 > -log10(p_cutoff))
   nk2 <- as.data.frame(nk1)
+
+  }
+
+  if (correctedpvalue == TRUE){
+    nk1 <-
+      (STEPP_Hit_ident$z_score_STEPP > SD_cutoff &
+         STEPP_Hit_ident$STEPP_log_10 > -log10((p_cutoff/STEPPuniquePeptide))) |
+      (STEPP_Hit_ident$z_score_STEPP < -SD_cutoff & STEPP_Hit_ident$STEPP_log_10 > -log10((p_cutoff/STEPPuniquePeptide)))
+    nk2 <- as.data.frame(nk1)
+
+  }
 
   Sig_Check_STEPP <-
     dplyr::if_else(nk2$nk1 == "TRUE", "Significant", "Not Significant")
@@ -1802,6 +1933,10 @@ STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex 
   }
 
   ggplot2::ggsave("Volcano_Plot_STEPP_Ligand.png", plot = Volcano_Plot)
+
+  if (interactiveplot == TRUE){
+    plotly::ggplotly(Volcano_Plot)
+  }
 
 }
 

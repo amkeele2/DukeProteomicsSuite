@@ -11,7 +11,7 @@ Author: Aaron Keeler [aut, cre],
 Maintainer: Aaron Keeler <aaron.keeler@duke.edu>
 Description: This package consists of 4 functions that generate hit lists and volcano plots for Expression level, OnePotTPP, OnePotSPROX, and STEPP directly from ProteomeDiscoverer (v. 2.3) readout. This package also includes functions to create venn diagrams comparing various methods
 License: Unlimited
-Depends: R (>= 3.5.0)
+Depends: R (>= 3.2.0)
 Imports:
 	dplyr,
 	tidyr,

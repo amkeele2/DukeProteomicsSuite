@@ -15,7 +15,9 @@ OnePotTPP_Phenotype.Fun(
   ylab = "- log10 (p value)",
   labelcolor = c("grey", "red"),
   alpha = 0.5,
-  plottextsize = 12
+  plottextsize = 12,
+  correctedpvalue = FALSE,
+  interactiveplot = FALSE
 )
 }
 \arguments{
@@ -38,6 +40,10 @@ OnePotTPP_Phenotype.Fun(
 \item{alpha}{Transparency of plot (default = 0.5)}
 
 \item{plottextsize}{Text Size of plot (default = 12)}
+
+\item{correctedpvalue}{Bonferroni corrected p-value (default = FALSE)}
+
+\item{interactiveplot}{Plotly interactive Volcano plot (default = FALSE)}
 
 \item{TPP_data}{Raw OnePotTPP (TMT10plex) ProteomeDiscoverer (v. 2.3) data}
 }

@@ -14,7 +14,9 @@ ExpressionLevel_Phenotype.Fun(
   ylab = "- log10 (p value)",
   labelcolor = c("grey", "red"),
   alpha = 0.5,
-  plottextsize = 12
+  plottextsize = 12,
+  correctedpvalue = FALSE,
+  interactiveplot = FALSE
 )
 }
 \arguments{
@@ -37,6 +39,10 @@ ExpressionLevel_Phenotype.Fun(
 \item{alpha}{Transparency of plot (default = 0.5)}
 
 \item{plottextsize}{Text Size of plot (default = 12)}
+
+\item{correctedpvalue}{Bonferroni corrected p-value (default = FALSE)}
+
+\item{interactiveplot}{Plotly interactive Volcano plot (default = FALSE)}
 }
 \value{
 Volcano plot, Hit list, Total proteins assayed, and Unique protein hits

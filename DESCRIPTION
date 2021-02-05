@@ -19,7 +19,8 @@ Imports:
 	magrittr,
 	utils,
 	VennDiagram,
-	plotly
+	plotly,
+	tidyselect
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

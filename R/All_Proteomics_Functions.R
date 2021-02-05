@@ -31,11 +31,12 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
 
 
   High_Confidence_Exp_Level <-
-    Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
+    dplyr::filter(Expression_data, Expression_data[,grepl("Confidence", names(Expression_data))] == "High")
 
   # This dataframe takes all useful columns from the raw data and will be outputed at the end for reference
 
-  Exp_Level_Concise <- High_Confidence_Exp_Level[, c("Protein FDR Confidence: Combined", "Accession", "Description", "Exp. q-value: Combined", "Sum PEP Score", "Coverage [%]", "# Peptides", "# PSMs", "# Unique Peptides", "# Protein Groups", "# AAs", "MW [kDa]", "calc. pI", "Score Sequest HT: Sequest HT", "# Peptides (by Search Engine): Sequest HT", "# Razor Peptides", "Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Exp_Level_Concise <- magrittr::"%>%" (High_Confidence_Exp_Level,
+                                        dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Description", "Accession", (grep(("^Abundances\\s\\(Grouped):"), names(High_Confidence_Exp_Level), value = TRUE))))))
 
   # Remove all blank rows in Dataframe
 
@@ -43,20 +44,68 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
 
   # Step 1
 
-  Exp_Level_1 <- NA_Removed[, c("Accession", "Description")]
-  Exp_Level_2 <- NA_Removed[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Exp_Level_1 <- magrittr::"%>%" (NA_Removed,
+                                  dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Description", "Accession"))))
+  Exp_Level_2 <- magrittr::"%>%" (NA_Removed,
+                                  dplyr::select(tidyselect::any_of(grep(("^Abundances\\s\\(Grouped):"), names(High_Confidence_Exp_Level), value = TRUE))))
   step1 <- cbind(Exp_Level_1, Exp_Level_2)
+
+  if ("Master Protein Accessions" %in% names(step1)){
+    step1 <- dplyr::rename(step1, "Accession" = "Master Protein Accessions")
+  }
 
   # Step 2
 
-  Normalized_Exp_1 <- (as.numeric(step1$`Abundances (Grouped): 126`) * mean(as.numeric(step1$`Abundances (Grouped): 129N`))) / (as.numeric(step1$`Abundances (Grouped): 129N`) * mean(as.numeric(step1$`Abundances (Grouped): 126`)))
-  Normalized_Exp_2 <- (as.numeric(step1$`Abundances (Grouped): 127N`) * mean(as.numeric(step1$`Abundances (Grouped): 129C`))) / (as.numeric(step1$`Abundances (Grouped): 129C`) * mean(as.numeric(step1$`Abundances (Grouped): 127N`)))
-  Normalized_Exp_3 <- (as.numeric(step1$`Abundances (Grouped): 127C`) * mean(as.numeric(step1$`Abundances (Grouped): 130N`))) / (as.numeric(step1$`Abundances (Grouped): 130N`) * mean(as.numeric(step1$`Abundances (Grouped): 127C`)))
-  Normalized_Exp_4 <- (as.numeric(step1$`Abundances (Grouped): 128N`) * mean(as.numeric(step1$`Abundances (Grouped): 130C`))) / (as.numeric(step1$`Abundances (Grouped): 130C`) * mean(as.numeric(step1$`Abundances (Grouped): 128N`)))
-  Normalized_Exp_5 <- (as.numeric(step1$`Abundances (Grouped): 128C`) * mean(as.numeric(step1$`Abundances (Grouped): 131`))) / (as.numeric(step1$`Abundances (Grouped): 131`) * mean(as.numeric(step1$`Abundances (Grouped): 128C`)))
+  if (("Accession" %in% names(step1) && "Description" %in% names(step1))) {
+
+    step1_real <-
+      dplyr::filter(
+        step1,
+        step1[,3] > 0,
+        step1[,4] > 0,
+        step1[,5] > 0,
+        step1[,6] > 0,
+        step1[,7] > 0,
+        step1[,8] > 0,
+        step1[,9] > 0,
+        step1[,10] > 0,
+        step1[,11] > 0,
+        step1[,12] > 0)
+
+  Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+  Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+  Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+  Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+  Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+
+  }
+
+  if (!"Description" %in% names(step1)){
+
+    step1_real <-
+      dplyr::filter(
+        step1,
+        step1[,2] > 0,
+        step1[,3] > 0,
+        step1[,4] > 0,
+        step1[,5] > 0,
+        step1[,6] > 0,
+        step1[,7] > 0,
+        step1[,8] > 0,
+        step1[,9] > 0,
+        step1[,10] > 0,
+        step1[,11] > 0)
+
+    Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,2])) * mean(as.numeric(unlist(step1_real[,7])))) / ((as.numeric(unlist(step1_real[,7]))) * mean(as.numeric(unlist(step1_real[,2]))))
+    Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+
+  }
 
   step2 <-
-    cbind(step1,
+    cbind(step1_real,
           Normalized_Exp_1,
           Normalized_Exp_2,
           Normalized_Exp_3,
@@ -88,9 +137,10 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
 
   f1 <- step5$Exp_Log_Avg
   mean_log_avg_Exp <- mean(f1)
-  sd_log_avg_Exp <- sd(f1)
 
+  sd_log_avg_Exp <- sd(f1)
   z_score_Exp <- ((f1 - mean_log_avg_Exp)) / (sd_log_avg_Exp)
+
   step6 <- cbind(step5, z_score_Exp)
 
   # Step 7
@@ -117,7 +167,8 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
 
   # Step 10
 
-  Hit_ident1_Exp <- step9[, c("Accession", "Description")]
+  Hit_ident1_Exp <- magrittr::"%>%" (step9,
+                                     dplyr::select(tidyselect::any_of(c("Description", "Accession"))))
   Log_Avg_Exp <- step9$Exp_Log_Avg
   Log_10_Exp <- step9$log_10_Exp
   Hit_ident_Exp <- cbind(Hit_ident1_Exp, Log_Avg_Exp, Log_10_Exp, Log_2_Exp_1, Log_2_Exp_2, Log_2_Exp_3, Log_2_Exp_4, Log_2_Exp_5, z_score_Exp)
@@ -153,8 +204,10 @@ ExpressionLevel_Phenotype.Fun <- function(Expression_data, SD_cutoff = 2, p_cuto
 
   Hit_List <- step10[step10$Sig_Check_Exp == "Significant", ]
   ExpExport <- unique(Hit_List$Accession)
-  ExpSigExport <- step10[, c("Accession", "Description", "z_score_Exp", "p_value_Exp", "Sig_Check_Exp")]
-  Hit_ListExport <- Hit_List[, c("Accession", "Description", "z_score_Exp", "p_value_Exp", "Sig_Check_Exp")]
+  ExpSigExport <- magrittr::"%>%" (step10,
+                                   dplyr::select(tidyselect::any_of(c("Accession", "Description", "z_score_Exp", "p_value_Exp", "Sig_Check_Exp"))))
+  Hit_ListExport <- magrittr::"%>%" (Hit_List,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Description", "z_score_Exp", "p_value_Exp", "Sig_Check_Exp"))))
 
   print(ExpSigExport)
   print(paste("There are", Exp_Number_Of_Hits, "Hits"))
@@ -233,11 +286,12 @@ options(max.print = 25000)
 # We can vary this to select for High | Medium | Low or both
 
 High_Confidence_Exp_Level <-
-  Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
+  dplyr::filter(Expression_data, Expression_data[,grepl(("Confidence"), names(Expression_data))] == "High")
 
 # This dataframe takes all useful columns from the raw data and will be outputed at the end for reference
 
-Exp_Level_Concise <- High_Confidence_Exp_Level[, c("Protein FDR Confidence: Combined", "Accession", "Description", "Exp. q-value: Combined", "Sum PEP Score", "Coverage [%]", "# Peptides", "# PSMs", "# Unique Peptides", "# Protein Groups", "# AAs", "MW [kDa]", "calc. pI", "Score Sequest HT: Sequest HT", "# Peptides (by Search Engine): Sequest HT", "# Razor Peptides", "Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+Exp_Level_Concise <- magrittr::"%>%" (High_Confidence_Exp_Level,
+                                      dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Description", "Accession", (grep(("^Abundances\\s\\(Grouped):"), names(High_Confidence_Exp_Level), value = TRUE))))))
 
 # Remove all blank rows in Dataframe
 
@@ -245,20 +299,69 @@ NA_Removed <- tidyr::drop_na(Exp_Level_Concise)
 
 # Step 1
 
-Exp_Level_1 <- NA_Removed[, c("Accession", "Description")]
-Exp_Level_2 <- NA_Removed[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+Exp_Level_1 <- magrittr::"%>%" (NA_Removed,
+                                dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Description", "Accession"))))
+Exp_Level_2 <- magrittr::"%>%" (NA_Removed,
+                                dplyr::select(tidyselect::any_of(grep(("^Abundances\\s\\(Grouped):"), names(High_Confidence_Exp_Level), value = TRUE))))
 step1 <- cbind(Exp_Level_1, Exp_Level_2)
+
+if ("Master Protein Accessions" %in% names(step1)){
+  step1 <- dplyr::rename(step1, "Accession" = "Master Protein Accessions")
+}
+
 
 # Step 2
 
-Normalized_Exp_1 <- (as.numeric(step1$`Abundances (Grouped): 126`) * mean(as.numeric(step1$`Abundances (Grouped): 129N`))) / (as.numeric(step1$`Abundances (Grouped): 129N`) * mean(as.numeric(step1$`Abundances (Grouped): 126`)))
-Normalized_Exp_2 <- (as.numeric(step1$`Abundances (Grouped): 127N`) * mean(as.numeric(step1$`Abundances (Grouped): 129C`))) / (as.numeric(step1$`Abundances (Grouped): 129C`) * mean(as.numeric(step1$`Abundances (Grouped): 127N`)))
-Normalized_Exp_3 <- (as.numeric(step1$`Abundances (Grouped): 127C`) * mean(as.numeric(step1$`Abundances (Grouped): 130N`))) / (as.numeric(step1$`Abundances (Grouped): 130N`) * mean(as.numeric(step1$`Abundances (Grouped): 127C`)))
-Normalized_Exp_4 <- (as.numeric(step1$`Abundances (Grouped): 128N`) * mean(as.numeric(step1$`Abundances (Grouped): 130C`))) / (as.numeric(step1$`Abundances (Grouped): 130C`) * mean(as.numeric(step1$`Abundances (Grouped): 128N`)))
-Normalized_Exp_5 <- (as.numeric(step1$`Abundances (Grouped): 128C`) * mean(as.numeric(step1$`Abundances (Grouped): 131`))) / (as.numeric(step1$`Abundances (Grouped): 131`) * mean(as.numeric(step1$`Abundances (Grouped): 128C`)))
+if (("Accession" %in% names(step1) && "Description" %in% names(step1))) {
+
+  step1_real <-
+    dplyr::filter(
+      step1,
+      step1[,3] > 0,
+      step1[,4] > 0,
+      step1[,5] > 0,
+      step1[,6] > 0,
+      step1[,7] > 0,
+      step1[,8] > 0,
+      step1[,9] > 0,
+      step1[,10] > 0,
+      step1[,11] > 0,
+      step1[,12] > 0)
+
+  Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+  Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+  Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+  Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+  Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+
+}
+
+if (!"Description" %in% names(step1)){
+
+  step1_real <-
+    dplyr::filter(
+      step1,
+      step1[,2] > 0,
+      step1[,3] > 0,
+      step1[,4] > 0,
+      step1[,5] > 0,
+      step1[,6] > 0,
+      step1[,7] > 0,
+      step1[,8] > 0,
+      step1[,9] > 0,
+      step1[,10] > 0,
+      step1[,11] > 0)
+
+  Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,2])) * mean(as.numeric(unlist(step1_real[,7])))) / ((as.numeric(unlist(step1_real[,7]))) * mean(as.numeric(unlist(step1_real[,2]))))
+  Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+  Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+  Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+  Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+
+}
 
 step2 <-
-  cbind(step1,
+  cbind(step1_real,
         Normalized_Exp_1,
         Normalized_Exp_2,
         Normalized_Exp_3,
@@ -319,7 +422,8 @@ step9 <- cbind(step8, log_10_Exp)
 
 # Step 10
 
-Hit_ident1_Exp <- step9[, c("Accession", "Description")]
+Hit_ident1_Exp <- magrittr::"%>%" (step9,
+                                   dplyr::select(tidyselect::any_of(c("Description", "Accession"))))
 Log_Avg_Exp <- step9$Exp_Log_Avg
 Log_10_Exp <- step9$log_10_Exp
 Hit_ident_Exp <- cbind(Hit_ident1_Exp, Log_Avg_Exp, Log_10_Exp, Log_2_Exp_1, Log_2_Exp_2, Log_2_Exp_3, Log_2_Exp_4, Log_2_Exp_5, z_score_Exp)
@@ -336,41 +440,48 @@ step10 <- cbind(Hit_ident_Exp, p_value_Exp, Sig_Check_Exp)
 
 # TPP_Data
 
-TPP_Confidence <- TPP_Raw[TPP_Raw$`Protein FDR Confidence: Combined` == "High",]
+TPP_Confidence <- dplyr::filter(TPP_Raw, TPP_Raw[,grepl(("Confidence"), names(TPP_Raw))] == "High")
 
-Data2 <- TPP_Confidence[, c("Protein FDR Confidence: Combined", "Accession", "Description", "Exp. q-value: Combined", "Sum PEP Score", "Coverage [%]", "# Peptides", "# PSMs", "# Unique Peptides", "# Protein Groups", "# AAs", "MW [kDa]", "calc. pI", "Score Sequest HT: Sequest HT", "# Peptides (by Search Engine): Sequest HT", "# Razor Peptides", "Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+Data2 <- magrittr::"%>%" (TPP_Confidence, dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession", "Description", (grep(("^Abundances\\s\\(Grouped):"), names(TPP_Confidence), value = TRUE))))))
 
 # Remove all blank rows in Dataframe
 
 NA_Removed_TPP <- tidyr::drop_na(Data2)
 
-TPP_1 <- NA_Removed_TPP[, c("Accession", "Description")]
-TPP_2 <- NA_Removed_TPP[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+TPP_1 <- magrittr::"%>%" (NA_Removed_TPP,
+                          dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accessions", "Description"))))
+TPP_2 <- magrittr::"%>%" (NA_Removed_TPP,
+                          dplyr::select(tidyselect::any_of(grep(("^Abundances\\s\\(Grouped):"), names(NA_Removed_TPP), value = TRUE))))
 step1_TPP <- cbind(TPP_1, TPP_2)
 
+if ("Master Protein Accessions" %in% names(step1_TPP)){
+  step1_TPP <- dplyr::rename(step1_TPP, "Accession" = "Master Protein Accessions")
+}
+
 TPP_merger <- merge(Hit_ident_Exp, step1_TPP)
+
 TPP_merge <-
   dplyr::filter(
     TPP_merger,
-    `Abundances (Grouped): 126` > 0,
-    `Abundances (Grouped): 127N` > 0,
-    `Abundances (Grouped): 127C` > 0,
-    `Abundances (Grouped): 128N` > 0,
-    `Abundances (Grouped): 128C` > 0,
-    `Abundances (Grouped): 129N` > 0,
-    `Abundances (Grouped): 129C` > 0,
-    `Abundances (Grouped): 130N` > 0,
-    `Abundances (Grouped): 130C` > 0,
-    `Abundances (Grouped): 131` > 0
-  )
+    TPP_merger[,11] > 0,
+    TPP_merger[,12] > 0,
+    TPP_merger[,13] > 0,
+    TPP_merger[,14] > 0,
+    TPP_merger[,15] > 0,
+    TPP_merger[,16] > 0,
+    TPP_merger[,17] > 0,
+    TPP_merger[,18] > 0,
+    TPP_merger[,19] > 0,
+    TPP_merger[,20] > 0)
+
 
 # Step 11
 
-Normalized_TPP_T1 <- (TPP_merge$`Abundances (Grouped): 126` * mean(TPP_merge$`Abundances (Grouped): 129N`)) / (TPP_merge$`Abundances (Grouped): 129N` * mean(TPP_merge$`Abundances (Grouped): 126`))
-Normalized_TPP_T2 <- (TPP_merge$`Abundances (Grouped): 127N` * mean(TPP_merge$`Abundances (Grouped): 129C`)) / (TPP_merge$`Abundances (Grouped): 129C` * mean(TPP_merge$`Abundances (Grouped): 127N`))
-Normalized_TPP_T3 <- (TPP_merge$`Abundances (Grouped): 127C` * mean(TPP_merge$`Abundances (Grouped): 130N`)) / (TPP_merge$`Abundances (Grouped): 130N` * mean(TPP_merge$`Abundances (Grouped): 127C`))
-Normalized_TPP_T4 <- (TPP_merge$`Abundances (Grouped): 128N` * mean(TPP_merge$`Abundances (Grouped): 130C`)) / (TPP_merge$`Abundances (Grouped): 130C` * mean(TPP_merge$`Abundances (Grouped): 128N`))
-Normalized_TPP_T5 <- (TPP_merge$`Abundances (Grouped): 128C` * mean(TPP_merge$`Abundances (Grouped): 131`)) / (TPP_merge$`Abundances (Grouped): 131` * mean(TPP_merge$`Abundances (Grouped): 128C`))
+Normalized_TPP_T1 <- (as.numeric(unlist(TPP_merge[,11])) * mean(as.numeric(unlist(TPP_merge[,16])))) / ((as.numeric(unlist(TPP_merge[,16]))) * mean(as.numeric(unlist(TPP_merge[,11]))))
+Normalized_TPP_T2 <- (as.numeric(unlist(TPP_merge[,12])) * mean(as.numeric(unlist(TPP_merge[,17])))) / ((as.numeric(unlist(TPP_merge[,17]))) * mean(as.numeric(unlist(TPP_merge[,12]))))
+Normalized_TPP_T3 <- (as.numeric(unlist(TPP_merge[,13])) * mean(as.numeric(unlist(TPP_merge[,18])))) / ((as.numeric(unlist(TPP_merge[,18]))) * mean(as.numeric(unlist(TPP_merge[,13]))))
+Normalized_TPP_T4 <- (as.numeric(unlist(TPP_merge[,14])) * mean(as.numeric(unlist(TPP_merge[,19])))) / ((as.numeric(unlist(TPP_merge[,19]))) * mean(as.numeric(unlist(TPP_merge[,14]))))
+Normalized_TPP_T5 <- (as.numeric(unlist(TPP_merge[,15])) * mean(as.numeric(unlist(TPP_merge[,20])))) / ((as.numeric(unlist(TPP_merge[,20]))) * mean(as.numeric(unlist(TPP_merge[,15]))))
 
 step11 <-
   cbind(TPP_merge,
@@ -451,7 +562,8 @@ jk1 <- step20$p_value_TPP
 TPP_log_10 <- -log10(jk1)
 step21 <- cbind(step20, TPP_log_10)
 
-TPP_Hit_ident1 <- step21[, c("Accession", "Description")]
+TPP_Hit_ident1 <- magrittr::"%>%" (step21,
+                                   dplyr::select(tidyselect::any_of(c("Accession", "Description"))))
 TPP_Log_Avg <- step21[, c("z_score_TPP", "p_value_TPP")]
 TPP_Hit_ident <- cbind(TPP_Hit_ident1, TPP_Log_Avg, TPP_log_10)
 
@@ -489,8 +601,10 @@ TPP_Number_Of_Hits <- length(which(abk))
 Hit_List <- step22[step22$Sig_Check_TPP == "Significant", ]
 TPPuniquehits <- dplyr::n_distinct(Hit_List$Accession)
 TPPExport <- unique(Hit_List$Accession)
-TPPSigExport <- step22[, c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP")]
-Hit_ListExportTPP <- Hit_List[, c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP")]
+TPPSigExport <- magrittr::"%>%" (step22,
+                                 dplyr::select(tidyselect::any_of(c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP"))))
+Hit_ListExportTPP <- magrittr::"%>%" (Hit_List,
+                                      dplyr::select(tidyselect::any_of(c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP"))))
 
 
 print(TPPSigExport)
@@ -575,43 +689,77 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
 
   # TPP_Data
 
-  TPP_Confidence <- TPP_Raw[TPP_Raw$`Protein FDR Confidence: Combined` == "High",]
+  TPP_Confidence <- dplyr::filter(TPP_Raw, TPP_Raw[,grepl("Confidence", names(TPP_Raw))] == "High")
 
-  Data2 <- TPP_Confidence[, c("Protein FDR Confidence: Combined", "Accession", "Description", "Exp. q-value: Combined", "Sum PEP Score", "Coverage [%]", "# Peptides", "# PSMs", "# Unique Peptides", "# Protein Groups", "# AAs", "MW [kDa]", "calc. pI", "Score Sequest HT: Sequest HT", "# Peptides (by Search Engine): Sequest HT", "# Razor Peptides", "Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Data2 <- magrittr::"%>%" (TPP_Confidence,
+                            dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession", "Description", (grep(("^Abundances\\s\\(Grouped):"), names(TPP_Confidence), value = TRUE))))))
+
+  if ("Master Protein Accessions" %in% names(Data2)){
+    Data2 <- dplyr::rename(Data2, "Accession" = "Master Protein Accessions")
+  }
 
   # Remove all blank rows in Dataframe
 
   NA_Removed_TPP <- tidyr::drop_na(Data2)
 
-  TPP_1 <- NA_Removed_TPP[, c("Accession", "Description")]
-  TPP_2 <- NA_Removed_TPP[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  TPP_1 <- magrittr::"%>%" (NA_Removed_TPP,
+                            dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession", "Description"))))
+  TPP_2 <- magrittr::"%>%" (NA_Removed_TPP,
+                            dplyr::select(tidyselect::any_of(grep("^Abundances\\s\\(Grouped):", names(NA_Removed_TPP), value = TRUE))))
   step1_TPP <- cbind(TPP_1, TPP_2)
 
-  TPP_merge <-
-    dplyr::filter(
-      step1_TPP,
-      `Abundances (Grouped): 126` > 0,
-      `Abundances (Grouped): 127N` > 0,
-      `Abundances (Grouped): 127C` > 0,
-      `Abundances (Grouped): 128N` > 0,
-      `Abundances (Grouped): 128C` > 0,
-      `Abundances (Grouped): 129N` > 0,
-      `Abundances (Grouped): 129C` > 0,
-      `Abundances (Grouped): 130N` > 0,
-      `Abundances (Grouped): 130C` > 0,
-      `Abundances (Grouped): 131` > 0
-    )
+  if (("Accession" %in% names(step1_TPP) && "Description" %in% names(step1_TPP))) {
+
+    step1_real <-
+      dplyr::filter(
+        step1_TPP,
+        step1_TPP[,3] > 0,
+        step1_TPP[,4] > 0,
+        step1_TPP[,5] > 0,
+        step1_TPP[,6] > 0,
+        step1_TPP[,7] > 0,
+        step1_TPP[,8] > 0,
+        step1_TPP[,9] > 0,
+        step1_TPP[,10] > 0,
+        step1_TPP[,11] > 0,
+        step1_TPP[,12] > 0)
+
+    Normalized_TPP_T1 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_TPP_T2 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_TPP_T3 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_TPP_T4 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+    Normalized_TPP_T5 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+
+  }
+
+  if (!"Description" %in% names(step1_TPP)){
+
+    step1_real <-
+      dplyr::filter(
+        step1_TPP,
+        step1_TPP[,2] > 0,
+        step1_TPP[,3] > 0,
+        step1_TPP[,4] > 0,
+        step1_TPP[,5] > 0,
+        step1_TPP[,6] > 0,
+        step1_TPP[,7] > 0,
+        step1_TPP[,8] > 0,
+        step1_TPP[,9] > 0,
+        step1_TPP[,10] > 0,
+        step1_TPP[,11] > 0)
+
+    Normalized_TPP_T1 <- (as.numeric(unlist(step1_real[,2])) * mean(as.numeric(unlist(step1_real[,7])))) / ((as.numeric(unlist(step1_real[,7]))) * mean(as.numeric(unlist(step1_real[,2]))))
+    Normalized_TPP_T2 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_TPP_T3 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_TPP_T4 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_TPP_T5 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+
+  }
 
   # Step 11
 
-  Normalized_TPP_T1 <- (TPP_merge$`Abundances (Grouped): 126` * mean(TPP_merge$`Abundances (Grouped): 129N`)) / (TPP_merge$`Abundances (Grouped): 129N` * mean(TPP_merge$`Abundances (Grouped): 126`))
-  Normalized_TPP_T2 <- (TPP_merge$`Abundances (Grouped): 127N` * mean(TPP_merge$`Abundances (Grouped): 129C`)) / (TPP_merge$`Abundances (Grouped): 129C` * mean(TPP_merge$`Abundances (Grouped): 127N`))
-  Normalized_TPP_T3 <- (TPP_merge$`Abundances (Grouped): 127C` * mean(TPP_merge$`Abundances (Grouped): 130N`)) / (TPP_merge$`Abundances (Grouped): 130N` * mean(TPP_merge$`Abundances (Grouped): 127C`))
-  Normalized_TPP_T4 <- (TPP_merge$`Abundances (Grouped): 128N` * mean(TPP_merge$`Abundances (Grouped): 130C`)) / (TPP_merge$`Abundances (Grouped): 130C` * mean(TPP_merge$`Abundances (Grouped): 128N`))
-  Normalized_TPP_T5 <- (TPP_merge$`Abundances (Grouped): 128C` * mean(TPP_merge$`Abundances (Grouped): 131`)) / (TPP_merge$`Abundances (Grouped): 131` * mean(TPP_merge$`Abundances (Grouped): 128C`))
-
   step11 <-
-    cbind(TPP_merge,
+    cbind(step1_real,
           Normalized_TPP_T1,
           Normalized_TPP_T2,
           Normalized_TPP_T3,
@@ -649,10 +797,12 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
   SD_TPP <- apply(k1, 1, sd)
   step16 <- cbind(step15, SD_TPP)
 
+
   # Step 17
 
   step17 <- tidyr::drop_na(step16)
   TPPunique <- dplyr::n_distinct(step17$Accession)
+
   # Step 18
 
   y1 <- step17$Log_Avg_TPP
@@ -663,7 +813,7 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
 
   # Step 19
 
-  hg1 <- abs(Log_Avg_TPP)
+  hg1 <- abs(step18$Log_Avg_TPP)
   hg2 <- step18$SD_TPP
 
   TPP_T_value <- (hg1 * sqrt(5) / hg2)
@@ -683,7 +833,8 @@ OnePotTPP_Ligand.Fun <- function(TPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTple
   TPP_log_10 <- -log10(jk1)
   step21 <- cbind(step20, TPP_log_10)
 
-  TPP_Hit_ident1 <- step21[, c("Accession", "Description")]
+  TPP_Hit_ident1 <- magrittr::"%>%" (step21,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Description"))))
   TPP_Log_Avg <- step21[, c("z_score_TPP", "p_value_TPP")]
   TPP_Hit_ident <- cbind(TPP_Hit_ident1, TPP_Log_Avg, TPP_log_10)
 
@@ -721,8 +872,10 @@ if (correctedpvalue == FALSE){
   Hit_List <- step22[step22$Sig_Check_TPP == "Significant", ]
   TPPuniquehits <- dplyr::n_distinct(Hit_List$Accession)
   TPPExport <- unique(Hit_List$Accession)
-  TPPSigExport <- step22[, c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP")]
-  Hit_ListExportTPP <- Hit_List[, c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP")]
+  TPPSigExport <- magrittr::"%>%" (step22,
+                                   dplyr::select(tidyselect::any_of(c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP"))))
+  Hit_ListExportTPP <- magrittr::"%>%" (Hit_List,
+                                        dplyr::select(tidyselect::any_of(c("Accession", "Description", "z_score_TPP", "p_value_TPP", "Sig_Check_TPP"))))
 
 
   print(TPPSigExport)
@@ -798,11 +951,12 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
     stop("p_value cutoff must be non-negative.\n")
 
   High_Confidence_Exp_Level <-
-    Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
+    dplyr::filter(Expression_data, Expression_data[,grepl("Confidence", names(Expression_data))] == "High")
 
   # This dataframe takes all useful columns from the raw data and will be outputed at the end for reference
 
-  Exp_Level_Concise <- High_Confidence_Exp_Level[, c("Protein FDR Confidence: Combined", "Accession", "Description", "Exp. q-value: Combined", "Sum PEP Score", "Coverage [%]", "# Peptides", "# PSMs", "# Unique Peptides", "# Protein Groups", "# AAs", "MW [kDa]", "calc. pI", "Score Sequest HT: Sequest HT", "# Peptides (by Search Engine): Sequest HT", "# Razor Peptides", "Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Exp_Level_Concise <- magrittr::"%>%" (High_Confidence_Exp_Level,
+                                        dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Description", "Accession", (grep(("^Abundances\\s\\(Grouped):"), names(High_Confidence_Exp_Level), value = TRUE))))))
 
   # Remove all blank rows in Dataframe
 
@@ -810,20 +964,69 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
 
   # Step 1
 
-  Exp_Level_1 <- NA_Removed[, c("Accession", "Description")]
-  Exp_Level_2 <- NA_Removed[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Exp_Level_1 <- magrittr::"%>%" (NA_Removed,
+                                  dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession", "Description"))))
+  Exp_Level_2 <- magrittr::"%>%" (NA_Removed,
+                                  dplyr::select(tidyselect::any_of(grep("^Abundances\\s\\(Grouped):", names(NA_Removed), value = TRUE))))
   step1 <- cbind(Exp_Level_1, Exp_Level_2)
+
+  if ("Master Protein Accessions" %in% names(step1)){
+    step1 <- dplyr::rename(step1, "Accession" = "Master Protein Accessions")
+  }
 
   # Step 2
 
-  Normalized_Exp_1 <- (as.numeric(step1$`Abundances (Grouped): 126`) * mean(as.numeric(step1$`Abundances (Grouped): 129N`))) / (as.numeric(step1$`Abundances (Grouped): 129N`) * mean(as.numeric(step1$`Abundances (Grouped): 126`)))
-  Normalized_Exp_2 <- (as.numeric(step1$`Abundances (Grouped): 127N`) * mean(as.numeric(step1$`Abundances (Grouped): 129C`))) / (as.numeric(step1$`Abundances (Grouped): 129C`) * mean(as.numeric(step1$`Abundances (Grouped): 127N`)))
-  Normalized_Exp_3 <- (as.numeric(step1$`Abundances (Grouped): 127C`) * mean(as.numeric(step1$`Abundances (Grouped): 130N`))) / (as.numeric(step1$`Abundances (Grouped): 130N`) * mean(as.numeric(step1$`Abundances (Grouped): 127C`)))
-  Normalized_Exp_4 <- (as.numeric(step1$`Abundances (Grouped): 128N`) * mean(as.numeric(step1$`Abundances (Grouped): 130C`))) / (as.numeric(step1$`Abundances (Grouped): 130C`) * mean(as.numeric(step1$`Abundances (Grouped): 128N`)))
-  Normalized_Exp_5 <- (as.numeric(step1$`Abundances (Grouped): 128C`) * mean(as.numeric(step1$`Abundances (Grouped): 131`))) / (as.numeric(step1$`Abundances (Grouped): 131`) * mean(as.numeric(step1$`Abundances (Grouped): 128C`)))
+  if (("Accession" %in% names(step1) && "Description" %in% names(step1))) {
+
+    step1_real <-
+      dplyr::filter(
+        step1,
+        step1[,3] > 0,
+        step1[,4] > 0,
+        step1[,5] > 0,
+        step1[,6] > 0,
+        step1[,7] > 0,
+        step1[,8] > 0,
+        step1[,9] > 0,
+        step1[,10] > 0,
+        step1[,11] > 0,
+        step1[,12] > 0)
+
+    Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+    Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+
+  }
+
+  if (!"Description" %in% names(step1)){
+
+    step1_real <-
+      dplyr::filter(
+        step1,
+        step1[,2] > 0,
+        step1[,3] > 0,
+        step1[,4] > 0,
+        step1[,5] > 0,
+        step1[,6] > 0,
+        step1[,7] > 0,
+        step1[,8] > 0,
+        step1[,9] > 0,
+        step1[,10] > 0,
+        step1[,11] > 0)
+
+    Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,2])) * mean(as.numeric(unlist(step1_real[,7])))) / ((as.numeric(unlist(step1_real[,7]))) * mean(as.numeric(unlist(step1_real[,2]))))
+    Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+
+  }
+
 
   step2 <-
-    cbind(step1,
+    cbind(step1_real,
           Normalized_Exp_1,
           Normalized_Exp_2,
           Normalized_Exp_3,
@@ -884,7 +1087,8 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
 
   # Step 10
 
-  Hit_ident1_Exp <- step9[, c("Accession", "Description")]
+  Hit_ident1_Exp <- magrittr::"%>%" (step9,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Description"))))
   Log_Avg_Exp <- step9$Exp_Log_Avg
   Log_10_Exp <- step9$log_10_Exp
   Hit_ident_Exp <- cbind(Hit_ident1_Exp, Log_Avg_Exp, Log_10_Exp, Log_2_Exp_1, Log_2_Exp_2, Log_2_Exp_3, Log_2_Exp_4, Log_2_Exp_5, z_score_Exp)
@@ -902,7 +1106,7 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
   # Remove [K] and [R] [+], [-], All bracketed Amino Acids
   # If contains oxidation modification remove it
 
-  SPROX_Confidence <- SPROX_Raw[SPROX_Raw$Confidence == "High",]
+  SPROX_Confidence <- dplyr::filter(SPROX_Raw, SPROX_Raw[,grepl("Confidence", names(SPROX_Raw))] == "High")
 
   SPROX_No_Oxid <- dplyr::filter(SPROX_Confidence, !grepl('Oxidation', Modifications))
 
@@ -917,42 +1121,76 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
 
   # Go through TPP analysis
 
-  SPROX_1 <- SPROX_Just_M[, c("Master Protein Accessions", "Positions in Master Proteins")]
-  SPROX_2 <- SPROX_Just_M[, c("Annotated Sequence", "Modifications")]
-  SPROX_3 <- SPROX_Just_M[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  SPROX_1 <- magrittr::"%>%" (SPROX_Just_M,
+                              dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Positions in Master Proteins"))))
+  SPROX_2 <- magrittr::"%>%" (SPROX_Just_M,
+                              dplyr::select(tidyselect::any_of(c("Annotated Sequence", "Modifications"))))
+  SPROX_3 <- magrittr::"%>%" (SPROX_Just_M,
+                              dplyr::select(tidyselect::any_of(grep("^Abundances\\s\\(Grouped):", names(SPROX_Just_M), value = TRUE))))
   step1_SPROX <- cbind(SPROX_1, SPROX_2, SPROX_3)
 
-
-  # Filter blanks
+  if ("Master Protein Accessions" %in% names(step1_SPROX)){
+    step1_SPROX <- dplyr::rename(step1_SPROX, "Accession" = "Master Protein Accessions")
+  }
 
   NA_Removed_SPROX <- tidyr::drop_na(step1_SPROX)
-  NA_Removed_SPROX_Renamed <- magrittr::"%>%" (NA_Removed_SPROX,
-    dplyr::rename("Accession" = "Master Protein Accessions"))
 
-  SPROX_merger <- merge(Hit_ident_Exp, NA_Removed_SPROX_Renamed, by = "Accession")
-  SPROX_merge <-
-    dplyr::filter(
-      SPROX_merger,
-      `Abundances (Grouped): 126` > 0,
-      `Abundances (Grouped): 127N` > 0,
-      `Abundances (Grouped): 127C` > 0,
-      `Abundances (Grouped): 128N` > 0,
-      `Abundances (Grouped): 128C` > 0,
-      `Abundances (Grouped): 129N` > 0,
-      `Abundances (Grouped): 129C` > 0,
-      `Abundances (Grouped): 130N` > 0,
-      `Abundances (Grouped): 130C` > 0,
-      `Abundances (Grouped): 131` > 0
-    )
+  SPROX_merger <- merge(Hit_ident_Exp, NA_Removed_SPROX)
+
+
+  if (("Accession" %in% names(NA_Removed_SPROX) && "Positions in Master Proteins" %in% names(NA_Removed_SPROX))) {
+
+    step1_real <-
+      dplyr::filter(
+        SPROX_merger,
+        SPROX_merger[,14] > 0,
+        SPROX_merger[,15] > 0,
+        SPROX_merger[,16] > 0,
+        SPROX_merger[,17] > 0,
+        SPROX_merger[,18] > 0,
+        SPROX_merger[,19] > 0,
+        SPROX_merger[,20] > 0,
+        SPROX_merger[,21] > 0,
+        SPROX_merger[,22] > 0,
+        SPROX_merger[,23] > 0)
+
+    Normalized_SPROX_T1 <- (as.numeric(unlist(step1_real[,14])) * mean(as.numeric(unlist(step1_real[,19])))) / ((as.numeric(unlist(step1_real[,19]))) * mean(as.numeric(unlist(step1_real[,14]))))
+    Normalized_SPROX_T2 <- (as.numeric(unlist(step1_real[,15])) * mean(as.numeric(unlist(step1_real[,20])))) / ((as.numeric(unlist(step1_real[,20]))) * mean(as.numeric(unlist(step1_real[,15]))))
+    Normalized_SPROX_T3 <- (as.numeric(unlist(step1_real[,16])) * mean(as.numeric(unlist(step1_real[,21])))) / ((as.numeric(unlist(step1_real[,21]))) * mean(as.numeric(unlist(step1_real[,16]))))
+    Normalized_SPROX_T4 <- (as.numeric(unlist(step1_real[,17])) * mean(as.numeric(unlist(step1_real[,22])))) / ((as.numeric(unlist(step1_real[,22]))) * mean(as.numeric(unlist(step1_real[,17]))))
+    Normalized_SPROX_T5 <- (as.numeric(unlist(step1_real[,18])) * mean(as.numeric(unlist(step1_real[,23])))) / ((as.numeric(unlist(step1_real[,23]))) * mean(as.numeric(unlist(step1_real[,18]))))
+
+  }
+
+  if (!"Positions in Master Proteins" %in% names(NA_Removed_SPROX)){
+
+    step1_real <-
+      dplyr::filter(
+        SPROX_merger,
+        SPROX_merger[,13] > 0,
+        SPROX_merger[,14] > 0,
+        SPROX_merger[,15] > 0,
+        SPROX_merger[,16] > 0,
+        SPROX_merger[,17] > 0,
+        SPROX_merger[,18] > 0,
+        SPROX_merger[,19] > 0,
+        SPROX_merger[,20] > 0,
+        SPROX_merger[,21] > 0,
+        SPROX_merger[,22] > 0)
+
+    Normalized_SPROX_T1 <- (as.numeric(unlist(step1_real[,13])) * mean(as.numeric(unlist(step1_real[,18])))) / ((as.numeric(unlist(step1_real[,18]))) * mean(as.numeric(unlist(step1_real[,13]))))
+    Normalized_SPROX_T2 <- (as.numeric(unlist(step1_real[,14])) * mean(as.numeric(unlist(step1_real[,19])))) / ((as.numeric(unlist(step1_real[,19]))) * mean(as.numeric(unlist(step1_real[,14]))))
+    Normalized_SPROX_T3 <- (as.numeric(unlist(step1_real[,15])) * mean(as.numeric(unlist(step1_real[,20])))) / ((as.numeric(unlist(step1_real[,20]))) * mean(as.numeric(unlist(step1_real[,15]))))
+    Normalized_SPROX_T4 <- (as.numeric(unlist(step1_real[,16])) * mean(as.numeric(unlist(step1_real[,21])))) / ((as.numeric(unlist(step1_real[,21]))) * mean(as.numeric(unlist(step1_real[,16]))))
+    Normalized_SPROX_T5 <- (as.numeric(unlist(step1_real[,17])) * mean(as.numeric(unlist(step1_real[,22])))) / ((as.numeric(unlist(step1_real[,22]))) * mean(as.numeric(unlist(step1_real[,17]))))
+
+  }
+
+  SPROX_merger <- merge(Hit_ident_Exp, step1_real)
+
+  SPROX_merge <- SPROX_merger
 
   # Step 11
-
-
-  Normalized_SPROX_T1 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 126`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 129N`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 129N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 126`)))
-  Normalized_SPROX_T2 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 127N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 129C`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 129C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 127N`)))
-  Normalized_SPROX_T3 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 127C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 130N`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 130N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 127C`)))
-  Normalized_SPROX_T4 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 128N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 130C`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 130C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 128N`)))
-  Normalized_SPROX_T5 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 128C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 131`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 131`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 128C`)))
 
   step11 <-
     cbind(SPROX_merge,
@@ -1034,8 +1272,10 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
   SPROX_log_10 <- -log10(jk1)
   step21 <- cbind(step20, SPROX_log_10)
 
-  SPROX_Hit_ident1 <- step21[, c("Accession", "Description")]
-  SPROX_Hit_ident2 <- step21[, c("Annotated Sequence", "Modifications")]
+  SPROX_Hit_ident1 <- magrittr::"%>%" (step21,
+                                       dplyr::select(tidyselect::any_of(c("Accession", "Description"))))
+  SPROX_Hit_ident2 <- magrittr::"%>%" (step21,
+                                       dplyr::select(tidyselect::any_of(c("Annotated Sequence", "Modifications"))))
   SPROX_Log_Avg <- step21[, c("SPROX_Avg", "SD_SPROX", "z_score_SPROX", "SPROX_T_value", "p_value_SPROX", "SPROX_log_10")]
   SPROX_Hit_ident <- cbind(SPROX_Hit_ident1, SPROX_Hit_ident2, SPROX_Log_Avg)
 
@@ -1073,8 +1313,10 @@ OnePotSPROX_Phenotype.Fun <- function(Expression_data, SPROX_Raw, SD_cutoff = 2,
   Hit_List <- step22[ step22$Sig_Check_SPROX == "Significant", ]
   SPROXuniqueHits <- dplyr::n_distinct(Hit_List$Accession)
   SPROXExport <- unique(Hit_List$Accession)
-  SPROXSigExport <- step22[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
-  Hit_ListExportSPROX <- Hit_List[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
+  SPROXSigExport <- magrittr::"%>%" (step22,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX"))))
+  Hit_ListExportSPROX <- magrittr::"%>%" (Hit_List,
+                                          dplyr::select(tidyselect::any_of(c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX"))))
 
 
   print(SPROXSigExport)
@@ -1152,7 +1394,7 @@ OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TM
   # Remove [K] and [R] [+], [-], All bracketed Amino Acids
   # If contains oxidation modification remove it
 
-  SPROX_Confidence <- SPROX_Raw[SPROX_Raw$Confidence == "High",]
+  SPROX_Confidence <- dplyr::filter(SPROX_Raw, SPROX_Raw[,grepl("Confidence", names(SPROX_Raw))] == "High")
 
   SPROX_No_Oxid <- dplyr::filter(SPROX_Confidence, !grepl('Oxidation', Modifications))
 
@@ -1167,44 +1409,76 @@ OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TM
 
   # Go through TPP analysis
 
-  SPROX_1 <- SPROX_Just_M[, c("Master Protein Accessions", "Positions in Master Proteins")]
-  SPROX_2 <- SPROX_Just_M[, c("Annotated Sequence", "Modifications")]
-  SPROX_3 <- SPROX_Just_M[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  SPROX_1 <- magrittr::"%>%" (SPROX_Just_M,
+                              dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Positions in Master Proteins"))))
+  SPROX_2 <- magrittr::"%>%" (SPROX_Just_M,
+                              dplyr::select(tidyselect::any_of(c("Annotated Sequence", "Modifications"))))
+  SPROX_3 <- magrittr::"%>%" (SPROX_Just_M,
+                              dplyr::select(tidyselect::any_of(grep("^Abundances\\s\\(Grouped):", names(SPROX_Just_M), value = TRUE))))
   step1_SPROX <- cbind(SPROX_1, SPROX_2, SPROX_3)
 
+  if ("Master Protein Accessions" %in% names(step1_SPROX)){
+    step1_SPROX <- dplyr::rename(step1_SPROX, "Accession" = "Master Protein Accessions")
+  }
 
   # Filter blanks
 
   NA_Removed_SPROX <- tidyr::drop_na(step1_SPROX)
-  NA_Removed_SPROX_Renamed <- magrittr::"%>%" (NA_Removed_SPROX,
-                                               dplyr::rename("Accession" = "Master Protein Accessions"))
 
-  SPROX_merge <-
-    dplyr::filter(
-      NA_Removed_SPROX_Renamed,
-      `Abundances (Grouped): 126` > 0,
-      `Abundances (Grouped): 127N` > 0,
-      `Abundances (Grouped): 127C` > 0,
-      `Abundances (Grouped): 128N` > 0,
-      `Abundances (Grouped): 128C` > 0,
-      `Abundances (Grouped): 129N` > 0,
-      `Abundances (Grouped): 129C` > 0,
-      `Abundances (Grouped): 130N` > 0,
-      `Abundances (Grouped): 130C` > 0,
-      `Abundances (Grouped): 131` > 0
-    )
+  if (("Accession" %in% names(NA_Removed_SPROX) && "Positions in Master Proteins" %in% names(NA_Removed_SPROX))) {
+
+    step1_real <-
+      dplyr::filter(
+        NA_Removed_SPROX,
+        NA_Removed_SPROX[,5] > 0,
+        NA_Removed_SPROX[,6] > 0,
+        NA_Removed_SPROX[,7] > 0,
+        NA_Removed_SPROX[,8] > 0,
+        NA_Removed_SPROX[,9] > 0,
+        NA_Removed_SPROX[,10] > 0,
+        NA_Removed_SPROX[,11] > 0,
+        NA_Removed_SPROX[,12] > 0,
+        NA_Removed_SPROX[,13] > 0,
+        NA_Removed_SPROX[,14] > 0)
+
+    Normalized_SPROX_T1 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_SPROX_T2 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+    Normalized_SPROX_T3 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+    Normalized_SPROX_T4 <- (as.numeric(unlist(step1_real[,8])) * mean(as.numeric(unlist(step1_real[,13])))) / ((as.numeric(unlist(step1_real[,13]))) * mean(as.numeric(unlist(step1_real[,8]))))
+    Normalized_SPROX_T5 <- (as.numeric(unlist(step1_real[,9])) * mean(as.numeric(unlist(step1_real[,14])))) / ((as.numeric(unlist(step1_real[,14]))) * mean(as.numeric(unlist(step1_real[,9]))))
+
+  }
+
+  if (!"Positions in Master Proteins" %in% names(NA_Removed_SPROX)){
+
+    step1_real <-
+      dplyr::filter(
+        NA_Removed_SPROX,
+        NA_Removed_SPROX[,4] > 0,
+        NA_Removed_SPROX[,5] > 0,
+        NA_Removed_SPROX[,6] > 0,
+        NA_Removed_SPROX[,7] > 0,
+        NA_Removed_SPROX[,8] > 0,
+        NA_Removed_SPROX[,9] > 0,
+        NA_Removed_SPROX[,10] > 0,
+        NA_Removed_SPROX[,11] > 0,
+        NA_Removed_SPROX[,12] > 0,
+        NA_Removed_SPROX[,13] > 0)
+
+    Normalized_SPROX_T1 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_SPROX_T2 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_SPROX_T3 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+    Normalized_SPROX_T4 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+    Normalized_SPROX_T5 <- (as.numeric(unlist(step1_real[,8])) * mean(as.numeric(unlist(step1_real[,13])))) / ((as.numeric(unlist(step1_real[,13]))) * mean(as.numeric(unlist(step1_real[,8]))))
+
+  }
+
+
 
   # Step 11
 
-
-  Normalized_SPROX_T1 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 126`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 129N`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 129N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 126`)))
-  Normalized_SPROX_T2 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 127N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 129C`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 129C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 127N`)))
-  Normalized_SPROX_T3 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 127C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 130N`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 130N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 127C`)))
-  Normalized_SPROX_T4 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 128N`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 130C`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 130C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 128N`)))
-  Normalized_SPROX_T5 <- (as.numeric(SPROX_merge$`Abundances (Grouped): 128C`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 131`))) / (as.numeric(SPROX_merge$`Abundances (Grouped): 131`) * mean(as.numeric(SPROX_merge$`Abundances (Grouped): 128C`)))
-
   step11 <-
-    cbind(SPROX_merge,
+    cbind(step1_real,
           Normalized_SPROX_T1,
           Normalized_SPROX_T2,
           Normalized_SPROX_T3,
@@ -1276,8 +1550,10 @@ OnePotSPROX_Ligand.Fun <- function(SPROX_Raw, SD_cutoff = 2, p_cutoff = 0.05, TM
   jk1 <- step20$p_value_SPROX
   SPROX_log_10 <- -log10(jk1)
   step21 <- cbind(step20, SPROX_log_10)
-  SPROX_Hit_ident1 <- step21[, c("Accession", "Annotated Sequence", "Modifications")]
-  SPROX_Log_Avg <- step21[, c("Log_Avg_SPROX", "SD_SPROX", "z_score_SPROX", "SPROX_T_value", "p_value_SPROX", "SPROX_log_10")]
+  SPROX_Hit_ident1 <- magrittr::"%>%" (step21,
+                                       dplyr::select(tidyselect::any_of(c("Accession", "Annotated Sequence", "Modifications"))))
+  SPROX_Log_Avg <- magrittr::"%>%" (step21,
+                                    dplyr::select(tidyselect::any_of(c("Log_Avg_SPROX", "SD_SPROX", "z_score_SPROX", "SPROX_T_value", "p_value_SPROX", "SPROX_log_10"))))
   SPROX_Hit_ident <- cbind(SPROX_Hit_ident1, SPROX_Log_Avg)
 
   # Step 22
@@ -1314,8 +1590,10 @@ nk2 <- as.data.frame(nk1)
   Hit_List <- step22[ step22$Sig_Check_SPROX == "Significant", ]
   SPROXuniqueHits <- dplyr::n_distinct(Hit_List$Accession)
   SPROXExport <- unique(Hit_List$Accession)
-  SPROXSigExport <- step22[, c("Accession", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
-  Hit_ListExportSPROX <- Hit_List[, c("Accession", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX")]
+  SPROXSigExport <- magrittr::"%>%" (step22,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX"))))
+  Hit_ListExportSPROX <- magrittr::"%>%" (Hit_List,
+                                          dplyr::select(tidyselect::any_of(c("Accession", "Annotated Sequence", "Modifications", "z_score_SPROX", "p_value_SPROX", "Sig_Check_SPROX"))))
 
 
   print(SPROXSigExport)
@@ -1392,11 +1670,13 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
     stop("p_value cutoff must be non-negative.\n")
 
   High_Confidence_Exp_Level <-
-    Expression_data[Expression_data$`Protein FDR Confidence: Combined` == "High",]
+    dplyr::filter(Expression_data, Expression_data[,grepl("Confidence", names(Expression_data))] == "High")
 
   # This dataframe takes all useful columns from the raw data and will be outputed at the end for reference
 
-  Exp_Level_Concise <- High_Confidence_Exp_Level[, c("Protein FDR Confidence: Combined", "Accession", "Description", "Exp. q-value: Combined", "Sum PEP Score", "Coverage [%]", "# Peptides", "# PSMs", "# Unique Peptides", "# Protein Groups", "# AAs", "MW [kDa]", "calc. pI", "Score Sequest HT: Sequest HT", "# Peptides (by Search Engine): Sequest HT", "# Razor Peptides", "Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Exp_Level_Concise <- magrittr::"%>%" (High_Confidence_Exp_Level,
+                                        dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Description", "Accession", (grep(("^Abundances\\s\\(Grouped):"), names(High_Confidence_Exp_Level), value = TRUE))))))
+
 
   # Remove all blank rows in Dataframe
 
@@ -1404,20 +1684,69 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
 
   # Step 1
 
-  Exp_Level_1 <- NA_Removed[, c("Accession", "Description")]
-  Exp_Level_2 <- NA_Removed[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  Exp_Level_1 <- magrittr::"%>%" (NA_Removed,
+                                  dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession", "Description"))))
+  Exp_Level_2 <- magrittr::"%>%" (NA_Removed,
+                                  dplyr::select(tidyselect::any_of(grep("^Abundances\\s\\(Grouped):", names(High_Confidence_Exp_Level), value = TRUE))))
   step1 <- cbind(Exp_Level_1, Exp_Level_2)
+
+  if ("Master Protein Accessions" %in% names(step1)){
+    step1 <- dplyr::rename(step1, "Accession" = "Master Protein Accessions")
+  }
 
   # Step 2
 
-  Normalized_Exp_1 <- (as.numeric(step1$`Abundances (Grouped): 126`) * mean(as.numeric(step1$`Abundances (Grouped): 129N`))) / (as.numeric(step1$`Abundances (Grouped): 129N`) * mean(as.numeric(step1$`Abundances (Grouped): 126`)))
-  Normalized_Exp_2 <- (as.numeric(step1$`Abundances (Grouped): 127N`) * mean(as.numeric(step1$`Abundances (Grouped): 129C`))) / (as.numeric(step1$`Abundances (Grouped): 129C`) * mean(as.numeric(step1$`Abundances (Grouped): 127N`)))
-  Normalized_Exp_3 <- (as.numeric(step1$`Abundances (Grouped): 127C`) * mean(as.numeric(step1$`Abundances (Grouped): 130N`))) / (as.numeric(step1$`Abundances (Grouped): 130N`) * mean(as.numeric(step1$`Abundances (Grouped): 127C`)))
-  Normalized_Exp_4 <- (as.numeric(step1$`Abundances (Grouped): 128N`) * mean(as.numeric(step1$`Abundances (Grouped): 130C`))) / (as.numeric(step1$`Abundances (Grouped): 130C`) * mean(as.numeric(step1$`Abundances (Grouped): 128N`)))
-  Normalized_Exp_5 <- (as.numeric(step1$`Abundances (Grouped): 128C`) * mean(as.numeric(step1$`Abundances (Grouped): 131`))) / (as.numeric(step1$`Abundances (Grouped): 131`) * mean(as.numeric(step1$`Abundances (Grouped): 128C`)))
+  if (("Accession" %in% names(step1) && "Description" %in% names(step1))) {
+
+    step1_real <-
+      dplyr::filter(
+        step1,
+        step1[,3] > 0,
+        step1[,4] > 0,
+        step1[,5] > 0,
+        step1[,6] > 0,
+        step1[,7] > 0,
+        step1[,8] > 0,
+        step1[,9] > 0,
+        step1[,10] > 0,
+        step1[,11] > 0,
+        step1[,12] > 0)
+
+    Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+    Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,7])) * mean(as.numeric(unlist(step1_real[,12])))) / ((as.numeric(unlist(step1_real[,12]))) * mean(as.numeric(unlist(step1_real[,7]))))
+
+  }
+
+  if (!"Description" %in% names(step1)){
+
+    step1_real <-
+      dplyr::filter(
+        step1,
+        step1[,2] > 0,
+        step1[,3] > 0,
+        step1[,4] > 0,
+        step1[,5] > 0,
+        step1[,6] > 0,
+        step1[,7] > 0,
+        step1[,8] > 0,
+        step1[,9] > 0,
+        step1[,10] > 0,
+        step1[,11] > 0)
+
+    Normalized_Exp_1 <- (as.numeric(unlist(step1_real[,2])) * mean(as.numeric(unlist(step1_real[,7])))) / ((as.numeric(unlist(step1_real[,7]))) * mean(as.numeric(unlist(step1_real[,2]))))
+    Normalized_Exp_2 <- (as.numeric(unlist(step1_real[,3])) * mean(as.numeric(unlist(step1_real[,8])))) / ((as.numeric(unlist(step1_real[,8]))) * mean(as.numeric(unlist(step1_real[,3]))))
+    Normalized_Exp_3 <- (as.numeric(unlist(step1_real[,4])) * mean(as.numeric(unlist(step1_real[,9])))) / ((as.numeric(unlist(step1_real[,9]))) * mean(as.numeric(unlist(step1_real[,4]))))
+    Normalized_Exp_4 <- (as.numeric(unlist(step1_real[,5])) * mean(as.numeric(unlist(step1_real[,10])))) / ((as.numeric(unlist(step1_real[,10]))) * mean(as.numeric(unlist(step1_real[,5]))))
+    Normalized_Exp_5 <- (as.numeric(unlist(step1_real[,6])) * mean(as.numeric(unlist(step1_real[,11])))) / ((as.numeric(unlist(step1_real[,11]))) * mean(as.numeric(unlist(step1_real[,6]))))
+
+  }
+
 
   step2 <-
-    cbind(step1,
+    cbind(step1_real,
           Normalized_Exp_1,
           Normalized_Exp_2,
           Normalized_Exp_3,
@@ -1478,7 +1807,8 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
 
   # Step 10
 
-  Hit_ident1_Exp <- step9[, c("Accession", "Description")]
+  Hit_ident1_Exp <- magrittr::"%>%" (step9,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Description"))))
   Log_Avg_Exp <- step9$Exp_Log_Avg
   Log_10_Exp <- step9$log_10_Exp
   Hit_ident_Exp <- cbind(Hit_ident1_Exp, Log_Avg_Exp, Log_10_Exp, Log_2_Exp_1, Log_2_Exp_2, Log_2_Exp_3, Log_2_Exp_4, Log_2_Exp_5, z_score_Exp)
@@ -1497,7 +1827,7 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
   # Only get Semi-Tryptic Peptides
 
 
-  STEPP_Confidence <- STEPP_Raw[STEPP_Raw$Confidence == "High",]
+  STEPP_Confidence <- dplyr::filter(STEPP_Raw, STEPP_Raw[,grepl("Confidence", names(STEPP_Raw))] == "High")
 
   STEPP_Semi_Tryp <- dplyr::filter(STEPP_Confidence, grepl("1xTMT6plex [N-Term]", Modifications, fixed = TRUE))
 
@@ -1507,40 +1837,46 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
 
   # Go through TPP analysis
 
-  STEPP_1 <- STEPP_removed_AA2[, "Master Protein Accessions"]
+  STEPP_1 <- magrittr::"%>%" (STEPP_removed_AA2,
+                              dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession"))))
   STEPP_2 <- STEPP_removed_AA2[, c("Annotated Sequence", "Modifications")]
-  STEPP_3 <- STEPP_removed_AA2[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  STEPP_3 <- STEPP_removed_AA2[, grep("^Abundances\\s\\(Grouped):", names(STEPP_removed_AA2), value = TRUE)]
   step1_STEPP <- cbind(STEPP_1, STEPP_2, STEPP_3)
+
+  if ("Master Protein Accessions" %in% names(step1_STEPP)){
+    step1_STEPP <- dplyr::rename(step1_STEPP, "Accession" = "Master Protein Accessions")
+  }
 
   # Filter blanks
 
   NA_Removed_STEPP <- tidyr::drop_na(step1_STEPP)
-  NA_Removed_STEPP_Renamed <- magrittr::"%>%" (NA_Removed_STEPP,
-    dplyr::rename("Accession" = "Master Protein Accessions"))
 
-  STEPP_merger <- merge(Hit_ident_Exp, NA_Removed_STEPP_Renamed)
-  STEPP_merge <-
-    dplyr::filter(
-      STEPP_merger,
-      `Abundances (Grouped): 126` > 0,
-      `Abundances (Grouped): 127N` > 0,
-      `Abundances (Grouped): 127C` > 0,
-      `Abundances (Grouped): 128N` > 0,
-      `Abundances (Grouped): 128C` > 0,
-      `Abundances (Grouped): 129N` > 0,
-      `Abundances (Grouped): 129C` > 0,
-      `Abundances (Grouped): 130N` > 0,
-      `Abundances (Grouped): 130C` > 0,
-      `Abundances (Grouped): 131` > 0
-    )
+    step1_real <-
+      dplyr::filter(
+        NA_Removed_STEPP,
+        NA_Removed_STEPP[,4] > 0,
+        NA_Removed_STEPP[,5] > 0,
+        NA_Removed_STEPP[,6] > 0,
+        NA_Removed_STEPP[,7] > 0,
+        NA_Removed_STEPP[,8] > 0,
+        NA_Removed_STEPP[,9] > 0,
+        NA_Removed_STEPP[,10] > 0,
+        NA_Removed_STEPP[,11] > 0,
+        NA_Removed_STEPP[,12] > 0,
+        NA_Removed_STEPP[,13] > 0)
+
+
+  STEPP_merger <- merge(Hit_ident_Exp, step1_real)
+
+  STEPP_merge <- STEPP_merger
 
   # Step 11
 
-  Normalized_STEPP_T1 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 126`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 129N`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 129N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 126`)))
-  Normalized_STEPP_T2 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 127N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 129C`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 129C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 127N`)))
-  Normalized_STEPP_T3 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 127C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 130N`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 130N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 127C`)))
-  Normalized_STEPP_T4 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 128N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 130C`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 130C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 128N`)))
-  Normalized_STEPP_T5 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 128C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 131`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 131`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 128C`)))
+  Normalized_STEPP_T1 <- (as.numeric(unlist(STEPP_merge[,13])) * mean(as.numeric(unlist(STEPP_merge[,18])))) / ((as.numeric(unlist(STEPP_merge[,18]))) * mean(as.numeric(unlist(STEPP_merge[,13]))))
+  Normalized_STEPP_T2 <- (as.numeric(unlist(STEPP_merge[,14])) * mean(as.numeric(unlist(STEPP_merge[,19])))) / ((as.numeric(unlist(STEPP_merge[,19]))) * mean(as.numeric(unlist(STEPP_merge[,14]))))
+  Normalized_STEPP_T3 <- (as.numeric(unlist(STEPP_merge[,15])) * mean(as.numeric(unlist(STEPP_merge[,20])))) / ((as.numeric(unlist(STEPP_merge[,20]))) * mean(as.numeric(unlist(STEPP_merge[,15]))))
+  Normalized_STEPP_T4 <- (as.numeric(unlist(STEPP_merge[,16])) * mean(as.numeric(unlist(STEPP_merge[,21])))) / ((as.numeric(unlist(STEPP_merge[,21]))) * mean(as.numeric(unlist(STEPP_merge[,16]))))
+  Normalized_STEPP_T5 <- (as.numeric(unlist(STEPP_merge[,17])) * mean(as.numeric(unlist(STEPP_merge[,22])))) / ((as.numeric(unlist(STEPP_merge[,22]))) * mean(as.numeric(unlist(STEPP_merge[,17]))))
 
   step11 <-
     cbind(STEPP_merge,
@@ -1623,9 +1959,12 @@ STEPP_Phenotype.Fun <- function(Expression_data, STEPP_Raw, SD_cutoff = 2, p_cut
   STEPP_log_10 <- -log10(jk1)
   step21 <- cbind(step20, STEPP_log_10)
 
-  STEPP_Hit_ident1 <- step21[, c("Accession", "Description")]
-  STEPP_Hit_ident2 <- step21[, c("Annotated Sequence", "Modifications")]
-  STEPP_Log_Avg <- step21[, c("STEPP_Avg", "SD_STEPP", "z_score_STEPP", "STEPP_T_value", "p_value_STEPP", "STEPP_log_10")]
+  STEPP_Hit_ident1 <- magrittr::"%>%" (step21,
+                                       dplyr::select(tidyselect::any_of(c("Accession", "Description"))))
+  STEPP_Hit_ident2 <- magrittr::"%>%" (step21,
+                                       dplyr::select(tidyselect::any_of(c("Annotated Sequence", "Modifications"))))
+  STEPP_Log_Avg <- magrittr::"%>%" (step21,
+                                    dplyr::select(tidyselect::any_of(c("STEPP_Avg", "SD_STEPP", "z_score_STEPP", "STEPP_T_value", "p_value_STEPP", "STEPP_log_10"))))
   STEPP_Hit_ident <- cbind(STEPP_Hit_ident1, STEPP_Hit_ident2, STEPP_Log_Avg)
 
   # Step 22
@@ -1663,8 +2002,10 @@ nk2 <- as.data.frame(nk1)
   Hit_List <- step22[ step22$Sig_Check_STEPP == "Significant", ]
   STEPPuniquehits <- dplyr::n_distinct(Hit_List$Accession)
   STEPPExport <- unique(Hit_List$Accession)
-  STEPPSigExport <- step22[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
-  Hit_ListExportSTEPP <- Hit_List[, c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
+  STEPPSigExport <- magrittr::"%>%" (step22,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP"))))
+  Hit_ListExportSTEPP <- magrittr::"%>%" (Hit_List,
+                                          dplyr::select(tidyselect::any_of(c("Accession", "Description", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP"))))
 
   print(STEPPSigExport)
   print(paste("There are", STEPP_Number_Of_Hits, "Hits"))
@@ -1741,7 +2082,7 @@ STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex 
   # Only get Semi-Tryptic Peptides
 
 
-  STEPP_Confidence <- STEPP_Raw[STEPP_Raw$Confidence == "High",]
+  STEPP_Confidence <- dplyr::filter(STEPP_Raw, STEPP_Raw[,grepl("Confidence", names(STEPP_Raw))] == "High")
 
   STEPP_Semi_Tryp <- dplyr::filter(STEPP_Confidence, grepl("1xTMT6plex [N-Term]", Modifications, fixed = TRUE))
 
@@ -1751,39 +2092,44 @@ STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex 
 
   # Go through TPP analysis
 
-  STEPP_1 <- STEPP_removed_AA2[, "Master Protein Accessions"]
+  STEPP_1 <- magrittr::"%>%" (STEPP_removed_AA2,
+                              dplyr::select(tidyselect::any_of(c("Master Protein Accessions", "Accession"))))
   STEPP_2 <- STEPP_removed_AA2[, c("Annotated Sequence", "Modifications")]
-  STEPP_3 <- STEPP_removed_AA2[, c("Abundances (Grouped): 126", "Abundances (Grouped): 127N", "Abundances (Grouped): 127C", "Abundances (Grouped): 128N", "Abundances (Grouped): 128C", "Abundances (Grouped): 129N", "Abundances (Grouped): 129C", "Abundances (Grouped): 130N", "Abundances (Grouped): 130C", "Abundances (Grouped): 131")]
+  STEPP_3 <- STEPP_removed_AA2[, grep("^Abundances\\s\\(Grouped):", names(STEPP_removed_AA2), value = TRUE)]
   step1_STEPP <- cbind(STEPP_1, STEPP_2, STEPP_3)
+
+  if ("Master Protein Accessions" %in% names(step1_STEPP)){
+    step1_STEPP <- dplyr::rename(step1_STEPP, "Accession" = "Master Protein Accessions")
+  }
 
   # Filter blanks
 
   NA_Removed_STEPP <- tidyr::drop_na(step1_STEPP)
-  NA_Removed_STEPP_Renamed <- magrittr::"%>%" (NA_Removed_STEPP,
-                                               dplyr::rename("Accession" = "Master Protein Accessions"))
 
-  STEPP_merge <-
-    dplyr::filter(
-      NA_Removed_STEPP_Renamed,
-      `Abundances (Grouped): 126` > 0,
-      `Abundances (Grouped): 127N` > 0,
-      `Abundances (Grouped): 127C` > 0,
-      `Abundances (Grouped): 128N` > 0,
-      `Abundances (Grouped): 128C` > 0,
-      `Abundances (Grouped): 129N` > 0,
-      `Abundances (Grouped): 129C` > 0,
-      `Abundances (Grouped): 130N` > 0,
-      `Abundances (Grouped): 130C` > 0,
-      `Abundances (Grouped): 131` > 0
-    )
+    step1_real <-
+      dplyr::filter(
+        NA_Removed_STEPP,
+        NA_Removed_STEPP[,4] > 0,
+        NA_Removed_STEPP[,5] > 0,
+        NA_Removed_STEPP[,6] > 0,
+        NA_Removed_STEPP[,7] > 0,
+        NA_Removed_STEPP[,8] > 0,
+        NA_Removed_STEPP[,9] > 0,
+        NA_Removed_STEPP[,10] > 0,
+        NA_Removed_STEPP[,11] > 0,
+        NA_Removed_STEPP[,12] > 0,
+        NA_Removed_STEPP[,13] > 0)
+
+  STEPP_merge <- step1_real
 
   # Step 11
 
-  Normalized_STEPP_T1 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 126`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 129N`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 129N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 126`)))
-  Normalized_STEPP_T2 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 127N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 129C`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 129C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 127N`)))
-  Normalized_STEPP_T3 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 127C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 130N`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 130N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 127C`)))
-  Normalized_STEPP_T4 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 128N`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 130C`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 130C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 128N`)))
-  Normalized_STEPP_T5 <- (as.numeric(STEPP_merge$`Abundances (Grouped): 128C`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 131`))) / (as.numeric(STEPP_merge$`Abundances (Grouped): 131`) * mean(as.numeric(STEPP_merge$`Abundances (Grouped): 128C`)))
+  Normalized_STEPP_T1 <- (as.numeric(unlist(STEPP_merge[,4])) * mean(as.numeric(unlist(STEPP_merge[,9])))) / ((as.numeric(unlist(STEPP_merge[,9]))) * mean(as.numeric(unlist(STEPP_merge[,4]))))
+  Normalized_STEPP_T2 <- (as.numeric(unlist(STEPP_merge[,5])) * mean(as.numeric(unlist(STEPP_merge[,10])))) / ((as.numeric(unlist(STEPP_merge[,10]))) * mean(as.numeric(unlist(STEPP_merge[,5]))))
+  Normalized_STEPP_T3 <- (as.numeric(unlist(STEPP_merge[,6])) * mean(as.numeric(unlist(STEPP_merge[,11])))) / ((as.numeric(unlist(STEPP_merge[,11]))) * mean(as.numeric(unlist(STEPP_merge[,6]))))
+  Normalized_STEPP_T4 <- (as.numeric(unlist(STEPP_merge[,7])) * mean(as.numeric(unlist(STEPP_merge[,12])))) / ((as.numeric(unlist(STEPP_merge[,12]))) * mean(as.numeric(unlist(STEPP_merge[,7]))))
+  Normalized_STEPP_T5 <- (as.numeric(unlist(STEPP_merge[,8])) * mean(as.numeric(unlist(STEPP_merge[,13])))) / ((as.numeric(unlist(STEPP_merge[,13]))) * mean(as.numeric(unlist(STEPP_merge[,8]))))
+
 
   step11 <-
     cbind(STEPP_merge,
@@ -1860,8 +2206,10 @@ STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex 
   STEPP_log_10 <- -log10(jk1)
   step21 <- cbind(step20, STEPP_log_10)
 
-  STEPP_Hit_ident1 <- step21[, c("Accession", "Annotated Sequence", "Modifications")]
-  STEPP_Log_Avg <- step21[, c("Log_Avg_STEPP", "SD_STEPP", "z_score_STEPP", "STEPP_T_value", "p_value_STEPP", "STEPP_log_10")]
+  STEPP_Hit_ident1 <- magrittr::"%>%" (step21,
+                                       dplyr::select(tidyselect::any_of(c("Accession", "Annotated Sequence", "Modifications"))))
+  STEPP_Log_Avg <- magrittr::"%>%" (step21,
+                                    dplyr::select(tidyselect::any_of(c("Log_Avg_STEPP", "SD_STEPP", "z_score_STEPP", "STEPP_T_value", "p_value_STEPP", "STEPP_log_10"))))
   STEPP_Hit_ident <- cbind(STEPP_Hit_ident1, STEPP_Log_Avg)
 
   # Step 22
@@ -1898,8 +2246,10 @@ STEPP_Ligand.Fun <- function(STEPP_Raw, SD_cutoff = 2, p_cutoff = 0.05, TMTplex 
   Hit_List <- step22[ step22$Sig_Check_STEPP == "Significant", ]
   STEPPuniquehits <- dplyr::n_distinct(Hit_List$Accession)
   STEPPExport <- unique(Hit_List$Accession)
-  STEPPSigExport <- step22[, c("Accession", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
-  Hit_ListExportSTEPP <- Hit_List[, c("Accession", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP")]
+  STEPPSigExport <- magrittr::"%>%" (step22,
+                                     dplyr::select(tidyselect::any_of(c("Accession", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP"))))
+  Hit_ListExportSTEPP <- magrittr::"%>%" (Hit_List,
+                                          dplyr::select(tidyselect::any_of(c("Accession", "Annotated Sequence", "Modifications", "z_score_STEPP", "p_value_STEPP", "Sig_Check_STEPP"))))
 
   print(STEPPSigExport)
   print(paste("There are", STEPP_Number_Of_Hits, "Hits"))

@@ -1,0 +1,212 @@
+---
+title: "Introduction to DukeProteomicsSuite"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DukeProteomicsSuite}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = TRUE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+set.seed(1000)
+```
+
+```{r, eval=TRUE, include=TRUE}
+library(DukeProteomicsSuite)
+```
+
+
+This vignette introduces DukeProteomicsSuite functions and helps those unfamiliar with energetic proteomics methods to better understand what this package does and how it can be used. We'll start with a rough overview of energetic proteomics methods, then discuss where this package can be used, and finally provide real-world examples. 
+
+# Overview
+
+Proteomics is a broad field of 
+
+Talk about expression level vs phenotype analysis
+
+# OnePotTPP
+
+TPP can be accessed using `OnePotTPP_Phenotype.Fun()` or `OnePotTPP_Ligand.Fun()`
+Can introduce error messages if p value is out of range or a TMTPlex is selected which is not currently available
+```{r, eval=TRUE, error=TRUE, purl=FALSE}
+OnePotTPP_Ligand.Fun(TPPExample_Ligand, p_cutoff = -5)
+```
+```{r, eval=TRUE, error=TRUE, purl=FALSE}
+OnePotTPP_Ligand.Fun(TPPExample_Ligand, TMTplex = 8)
+```
+
+Look at example data by `?TPPExample_Ligand`
+
+
+```{r, eval=FALSE}
+OnePotTPP_Phenotype.Fun()
+```
+Calculates the 
+Introduce the method
+Go through the analysis
+Examples
+# OnePotSPROX
+Introduce the method
+Go through the analysis
+Examples
+# STEPP/LiP
+
+Here we go `knit`
+
+
+
+Here is some code
+```{r, eval=FALSE}
+library(DukeProteomicsSuite)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
